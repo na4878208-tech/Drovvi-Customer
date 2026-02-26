@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/constants/session_expired.dart';
 import 'package:logisticscustomer/features/home/orders_flow/create_orders_screens/main_order_create_screen.dart';
 import 'package:logisticscustomer/features/home/orders_flow/all_orders/get_all_orders_modal.dart';
@@ -24,7 +25,7 @@ class _OrdersState extends ConsumerState<Orders> {
 
   final List<String> _statusFilters = [
     'All',
-    'Active',
+    // 'Active',
     'Assigned',
     'Pending',
     'Confirmed',
@@ -683,12 +684,16 @@ class _OrdersState extends ConsumerState<Orders> {
                                 Clipboard.setData(
                                   ClipboardData(text: order.trackingCode!),
                                 );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Tracking code copied"),
-                                    duration: Duration(seconds: 1),
-                                  ),
+                                AppSnackBar.showSuccess(
+                                  context,
+                                  "Tracking code copied",
                                 );
+                                // ScaffoldMessenger.of(context).showSnackBar(
+                                //   const SnackBar(
+                                //     content: Text("Tracking code copied"),
+                                //     duration: Duration(seconds: 1),
+                                //   ),
+                                // );
                               },
                               child: const Icon(Icons.copy, size: 12),
                             ),

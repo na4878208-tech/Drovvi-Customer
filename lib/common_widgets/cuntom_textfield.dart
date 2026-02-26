@@ -94,10 +94,11 @@ class _CustomAnimatedTextFieldState extends State<CustomAnimatedTextField> {
               focusNode: widget.focusNode,
               keyboardType: widget.keyboardType,
               obscureText: widget.obscureText,
-              readOnly: widget.readOnly, // ✅ support readOnly
-              onTap: widget.onTap, // ✅ support optional onTap
+              readOnly: widget.readOnly,
+              onTap: widget.onTap,
+              inputFormatters: widget.inputFormatters,
 
-              validator: (value) => null, // suppress default error
+              validator: (value) => null,
               autovalidateMode: AutovalidateMode.onUserInteraction,
 
               onChanged: (val) {

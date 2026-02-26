@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import '../../../export.dart';
 import '../../../common_widgets/cuntom_textfield.dart';
 import '../../../common_widgets/custom_button.dart';
@@ -71,8 +72,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     phoneController.addListener(checkFields);
 
     // Fetch profile on init
-    Future.microtask(() =>
-        ref.read(editProfileControllerProvider.notifier).getProfile());
+    Future.microtask(
+      () => ref.read(editProfileControllerProvider.notifier).getProfile(),
+    );
   }
 
   @override
@@ -96,8 +98,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final editProfileState = ref.watch(editProfileControllerProvider);
-    final editProfileController =
-        ref.read(editProfileControllerProvider.notifier);
+    final editProfileController = ref.read(
+      editProfileControllerProvider.notifier,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.lightGrayBackground,
@@ -159,15 +162,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                   fit: BoxFit.cover,
                                 )
                               : (profile?.customer.profilePhoto != null
-                                  ? DecorationImage(
-                                      image: NetworkImage(
-                                        profile!.customer.profilePhoto!,
-                                      ),
-                                      fit: BoxFit.cover,
-                                    )
-                                  : null),
+                                    ? DecorationImage(
+                                        image: NetworkImage(
+                                          profile!.customer.profilePhoto!,
+                                        ),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null),
                         ),
-                        child: profileImage == null &&
+                        child:
+                            profileImage == null &&
                                 profile?.customer.profilePhoto == null
                             ? const Icon(
                                 Icons.person_outlined,
@@ -257,12 +261,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                 .value;
 
                             if (result != null && result.success) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    result.message ?? "Updated successfully",
-                                  ),
-                                ),
+                              AppSnackBar.showSuccess(
+                                context,
+                                result.message ?? "Updated successfully",
                               );
 
                               Navigator.pushReplacement(
@@ -270,7 +271,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                 MaterialPageRoute(
                                   builder: (context) =>
                                       const TripsBottomNavBarScreen(
-                                          initialIndex: 3),
+                                        initialIndex: 3,
+                                      ),
                                 ),
                               );
                             }

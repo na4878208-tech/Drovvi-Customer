@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/constants/gap.dart';
 import 'package:logisticscustomer/constants/local_storage.dart';
 import 'package:logisticscustomer/constants/session_expired.dart';
@@ -183,11 +184,7 @@ class _GetProfileScreenState extends ConsumerState<GetProfileScreen> {
                                             (route) => false,
                                           );
 
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(content: Text(msg)),
-                                          );
+                                          AppSnackBar.showSuccess(context, msg);
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(

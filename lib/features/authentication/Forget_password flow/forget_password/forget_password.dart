@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/constants/validation_regx.dart';
 import 'package:logisticscustomer/features/authentication/Forget_password%20flow/rest_verification_otp/rest_verification_otp.dart';
 import '../../../../export.dart';
@@ -32,25 +33,28 @@ class _ForgotPasswordState extends ConsumerState<ForgotPassword> {
       next.whenOrNull(
         data: (response) {
           if (response != null && response.success) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(response.message)));
+            // ScaffoldMessenger.of(
+            //   context,
+            // ).showSnackBar(SnackBar(content: Text(response.message)));
+
+            AppSnackBar.showSuccess(context, response.message);
 
             /// ✅ Navigate with EMAIL DATA
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => RestVerificationScreen(
-                  forgotPasswordData: response.data, // 👈 FIX
+                  forgotPasswordData: response.data, // FIX
                 ),
               ),
             );
           }
         },
         error: (error, _) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(error.toString())));
+          AppSnackBar.showError(context, error.toString());
+          // ScaffoldMessenger.of(
+          //   context,
+          // ).showSnackBar(SnackBar(content: Text(error.toString())));
         },
       );
     });

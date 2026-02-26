@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logisticscustomer/common_widgets/custom_button.dart';
 import 'package:logisticscustomer/common_widgets/custom_text.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/constants/colors.dart';
 
 import 'package:logisticscustomer/constants/gap.dart';
@@ -423,217 +424,224 @@ class _ServicePaymentScreenState extends ConsumerState<ServicePaymentScreen> {
   // UPDATED: Multi-Stop Quotes Calculation
   // _calculateMultiStopQuotes() function ko update karo:
 
-Future<void> _calculateMultiStopQuotes({
-  required int productTypeId,
-  required int packagingTypeId,
-  required List<String> selectedAddons,
-}) async {
-  final cache = ref.read(orderCacheProvider);
+  Future<void> _calculateMultiStopQuotes({
+    required int productTypeId,
+    required int packagingTypeId,
+    required List<String> selectedAddons,
+  }) async {
+    final cache = ref.read(orderCacheProvider);
 
-  print("🔍 MULTI-STOP CACHE DATA:");
-  print("Product Type ID: ${cache["selected_product_type_id"]}");
-  print("Packaging Type ID: ${cache["selected_packaging_type_id"]}");
-  print("Service Type ID: ${selectedServiceTypeId}");
-  print("Stops Count: ${cache["route_stops_count"]}");
+    print("🔍 MULTI-STOP CACHE DATA:");
+    print("Product Type ID: ${cache["selected_product_type_id"]}");
+    print("Packaging Type ID: ${cache["selected_packaging_type_id"]}");
+    print("Service Type ID: ${selectedServiceTypeId}");
+    print("Stops Count: ${cache["route_stops_count"]}");
 
-  final stopsCount =
-      int.tryParse(cache["route_stops_count"]?.toString() ?? "0") ?? 0;
+    final stopsCount =
+        int.tryParse(cache["route_stops_count"]?.toString() ?? "0") ?? 0;
 
-  if (stopsCount < 2) {
-    throw Exception("Multi-stop route requires at least 2 stops");
-  }
-
-  final stops = <StopRequest>[];
-  int totalQuantity = 0;
-  double totalWeight = 0.0;
-
-  for (int i = 1; i <= stopsCount; i++) {
-    final stopTypeStr = cache["stop_${i}_type"]?.toString() ?? "";
-    final city = cache["stop_${i}_city"]?.toString().trim() ?? "";
-    final state = cache["stop_${i}_state"]?.toString().trim() ?? "";
-
-    if (city.isEmpty || state.isEmpty) {
-      throw Exception("Stop $i: Please enter City and State");
+    if (stopsCount < 2) {
+      throw Exception("Multi-stop route requires at least 2 stops");
     }
 
-    // Coordinates
-    String lat, lng;
-    if (city.toLowerCase().contains("cape town")) {
-      lat = "-33.9249";
-      lng = "18.4241";
-    } else if (city.toLowerCase().contains("johannesburg") ||
-        city.toLowerCase().contains("joburg")) {
-      lat = "-26.2041";
-      lng = "28.0473";
-    } else if (city.toLowerCase().contains("durban")) {
-      lat = "-29.8587";
-      lng = "31.0218";
-    } else if (city.toLowerCase().contains("pretoria")) {
-      lat = "-25.7479";
-      lng = "28.2293";
-    } else {
-      lat = "-26.2041";
-      lng = "28.0473";
-    }
+    final stops = <StopRequest>[];
+    int totalQuantity = 0;
+    double totalWeight = 0.0;
 
-    // ✅ API format mein stop type convert karo
-    String apiStopType;
-    if (stopTypeStr.contains("pickup")) {
-      apiStopType = "pickup";
-    } else if (stopTypeStr.contains("dropOff")) {
-      apiStopType = "drop_off";
-    } else {
-      apiStopType = "waypoint";
-    }
+    for (int i = 1; i <= stopsCount; i++) {
+      final stopTypeStr = cache["stop_${i}_type"]?.toString() ?? "";
+      final city = cache["stop_${i}_city"]?.toString().trim() ?? "";
+      final state = cache["stop_${i}_state"]?.toString().trim() ?? "";
 
-    // ✅ Quantity aur weight ke liye variables
-    int quantity = 0;
-    double weight = 0.0;
-
-    // ✅ Waypoint ke liye quantity/weight skip
-    if (apiStopType == "waypoint") {
-      print("Stop $i is Waypoint - Skipping quantity/weight");
-    } 
-    // ✅ Pickup ke liye quantity/weight REQUIRED
-    else if (apiStopType == "pickup") {
-      final quantityStr = cache["stop_${i}_quantity"]?.toString();
-      final weightStr = cache["stop_${i}_weight"]?.toString();
-
-      print("Stop $i (Pickup) - Raw quantity: '$quantityStr', Raw weight: '$weightStr'");
-
-      if (quantityStr == null || quantityStr.isEmpty) {
-        throw Exception("Stop $i (Pickup): Please enter quantity");
+      if (city.isEmpty || state.isEmpty) {
+        throw Exception("Stop $i: Please enter City and State");
       }
 
-      if (weightStr == null || weightStr.isEmpty) {
-        throw Exception("Stop $i (Pickup): Please enter weight per item");
+      // Coordinates
+      String lat, lng;
+      if (city.toLowerCase().contains("cape town")) {
+        lat = "-33.9249";
+        lng = "18.4241";
+      } else if (city.toLowerCase().contains("johannesburg") ||
+          city.toLowerCase().contains("joburg")) {
+        lat = "-26.2041";
+        lng = "28.0473";
+      } else if (city.toLowerCase().contains("durban")) {
+        lat = "-29.8587";
+        lng = "31.0218";
+      } else if (city.toLowerCase().contains("pretoria")) {
+        lat = "-25.7479";
+        lng = "28.2293";
+      } else {
+        lat = "-26.2041";
+        lng = "28.0473";
       }
 
-      final parsedQuantity = int.tryParse(quantityStr);
-      if (parsedQuantity == null || parsedQuantity <= 0) {
-        throw Exception(
-          "Stop $i (Pickup): Invalid quantity. Please enter a positive number.",
+      // ✅ API format mein stop type convert karo
+      String apiStopType;
+      if (stopTypeStr.contains("pickup")) {
+        apiStopType = "pickup";
+      } else if (stopTypeStr.contains("dropOff")) {
+        apiStopType = "drop_off";
+      } else {
+        apiStopType = "waypoint";
+      }
+
+      // ✅ Quantity aur weight ke liye variables
+      int quantity = 0;
+      double weight = 0.0;
+
+      // ✅ Waypoint ke liye quantity/weight skip
+      if (apiStopType == "waypoint") {
+        print("Stop $i is Waypoint - Skipping quantity/weight");
+      }
+      // ✅ Pickup ke liye quantity/weight REQUIRED
+      else if (apiStopType == "pickup") {
+        final quantityStr = cache["stop_${i}_quantity"]?.toString();
+        final weightStr = cache["stop_${i}_weight"]?.toString();
+
+        print(
+          "Stop $i (Pickup) - Raw quantity: '$quantityStr', Raw weight: '$weightStr'",
         );
-      }
 
-      final parsedWeight = double.tryParse(weightStr);
-      if (parsedWeight == null || parsedWeight <= 0) {
-        throw Exception(
-          "Stop $i (Pickup): Invalid weight. Please enter a positive number.",
-        );
-      }
+        if (quantityStr == null || quantityStr.isEmpty) {
+          throw Exception("Stop $i (Pickup): Please enter quantity");
+        }
 
-      quantity = parsedQuantity;
-      weight = parsedWeight;
+        if (weightStr == null || weightStr.isEmpty) {
+          throw Exception("Stop $i (Pickup): Please enter weight per item");
+        }
 
-      totalQuantity += quantity;
-      totalWeight += (weight * quantity);
-    } 
-    // ✅ DropOff ke liye quantity/weight OPTIONAL
-    else if (apiStopType == "drop_off") {
-      final quantityStr = cache["stop_${i}_quantity"]?.toString();
-      final weightStr = cache["stop_${i}_weight"]?.toString();
-
-      print("Stop $i (DropOff) - Raw quantity: '$quantityStr', Raw weight: '$weightStr'");
-
-      // Agar quantity di hai to parse karo, warna default 0
-      if (quantityStr != null && quantityStr.isNotEmpty) {
         final parsedQuantity = int.tryParse(quantityStr);
-        if (parsedQuantity != null && parsedQuantity > 0) {
-          quantity = parsedQuantity;
+        if (parsedQuantity == null || parsedQuantity <= 0) {
+          throw Exception(
+            "Stop $i (Pickup): Invalid quantity. Please enter a positive number.",
+          );
         }
-      }
 
-      // Agar weight di hai to parse karo, warna default 0
-      if (weightStr != null && weightStr.isNotEmpty) {
         final parsedWeight = double.tryParse(weightStr);
-        if (parsedWeight != null && parsedWeight > 0) {
-          weight = parsedWeight;
+        if (parsedWeight == null || parsedWeight <= 0) {
+          throw Exception(
+            "Stop $i (Pickup): Invalid weight. Please enter a positive number.",
+          );
         }
-      }
 
-      // Agar quantity aur weight dono diye hain to total mein add karo
-      if (quantity > 0 && weight > 0) {
+        quantity = parsedQuantity;
+        weight = parsedWeight;
+
         totalQuantity += quantity;
         totalWeight += (weight * quantity);
       }
+      // ✅ DropOff ke liye quantity/weight OPTIONAL
+      else if (apiStopType == "drop_off") {
+        final quantityStr = cache["stop_${i}_quantity"]?.toString();
+        final weightStr = cache["stop_${i}_weight"]?.toString();
+
+        print(
+          "Stop $i (DropOff) - Raw quantity: '$quantityStr', Raw weight: '$weightStr'",
+        );
+
+        // Agar quantity di hai to parse karo, warna default 0
+        if (quantityStr != null && quantityStr.isNotEmpty) {
+          final parsedQuantity = int.tryParse(quantityStr);
+          if (parsedQuantity != null && parsedQuantity > 0) {
+            quantity = parsedQuantity;
+          }
+        }
+
+        // Agar weight di hai to parse karo, warna default 0
+        if (weightStr != null && weightStr.isNotEmpty) {
+          final parsedWeight = double.tryParse(weightStr);
+          if (parsedWeight != null && parsedWeight > 0) {
+            weight = parsedWeight;
+          }
+        }
+
+        // Agar quantity aur weight dono diye hain to total mein add karo
+        if (quantity > 0 && weight > 0) {
+          totalQuantity += quantity;
+          totalWeight += (weight * quantity);
+        }
+      }
+
+      stops.add(
+        StopRequest(
+          sequenceNumber: i,
+          stopType: apiStopType,
+          address:
+              cache["stop_${i}_address"]?.toString() ?? "Address not provided",
+          city: city,
+          state: state,
+          latitude: double.parse(lat),
+          longitude: double.parse(lng),
+          contactName:
+              cache["stop_${i}_contact_name"]?.toString() ?? "Contact N/A",
+          contactPhone:
+              cache["stop_${i}_contact_phone"]?.toString() ?? "Phone N/A",
+          quantity: quantity,
+          weight: weight,
+          notes: cache["stop_${i}_notes"]?.toString(),
+        ),
+      );
     }
 
-    stops.add(
-      StopRequest(
-        sequenceNumber: i,
-        stopType: apiStopType,
-        address: cache["stop_${i}_address"]?.toString() ?? "Address not provided",
-        city: city,
-        state: state,
-        latitude: double.parse(lat),
-        longitude: double.parse(lng),
-        contactName: cache["stop_${i}_contact_name"]?.toString() ?? "Contact N/A",
-        contactPhone: cache["stop_${i}_contact_phone"]?.toString() ?? "Phone N/A",
-        quantity: quantity,
-        weight: weight,
-        notes: cache["stop_${i}_notes"]?.toString(),
-      ),
+    // ✅ Validate - Kam se kam ek pickup mein quantity/weight hona chahiye
+    final hasPickupWithItems = stops.any(
+      (s) => s.stopType == "pickup" && s.quantity > 0 && s.weight > 0,
     );
+
+    if (!hasPickupWithItems) {
+      throw Exception("At least one pickup stop must have quantity and weight");
+    }
+
+    // ✅ Calculate average weight per item
+    double weightPerItem = 0.0;
+    if (totalQuantity > 0) {
+      weightPerItem = totalWeight / totalQuantity;
+    }
+
+    print("📊 WEIGHT CALCULATION:");
+    print("Total Quantity: $totalQuantity");
+    print("Total Weight: $totalWeight");
+    print("Average Weight Per Item: $weightPerItem");
+
+    // Save to cache
+    ref
+        .read(orderCacheProvider.notifier)
+        .saveValue("quantity", totalQuantity.toString());
+    ref
+        .read(orderCacheProvider.notifier)
+        .saveValue("total_weight", totalWeight.toString());
+
+    final serviceType = selectedServiceTypeId ?? "standard";
+    final declaredValueStr = cache["declared_value"]?.toString() ?? "0";
+    final declaredValue = double.tryParse(declaredValueStr) ?? 0.0;
+    final dimensions = _getDimensionsFromCache(cache);
+
+    try {
+      await ref
+          .read(quoteControllerProvider.notifier)
+          .calculateMultiStopQuote(
+            productTypeId: productTypeId,
+            packagingTypeId: packagingTypeId,
+            stops: stops,
+            quantity: totalQuantity,
+            weightPerItem: weightPerItem,
+            serviceType: serviceType,
+            declaredValue: declaredValue,
+            addOns: selectedAddons,
+            length: dimensions['length'],
+            width: dimensions['width'],
+            height: dimensions['height'],
+          );
+    } catch (e) {
+      print("❌ MULTI-STOP ERROR DETAILS:");
+      print("Error Type: ${e.runtimeType}");
+      print("Error Message: $e");
+      rethrow;
+    }
   }
 
-  // ✅ Validate - Kam se kam ek pickup mein quantity/weight hona chahiye
-  final hasPickupWithItems = stops.any((s) => 
-    s.stopType == "pickup" && s.quantity > 0 && s.weight > 0
-  );
-
-  if (!hasPickupWithItems) {
-    throw Exception("At least one pickup stop must have quantity and weight");
-  }
-
-  // ✅ Calculate average weight per item
-  double weightPerItem = 0.0;
-  if (totalQuantity > 0) {
-    weightPerItem = totalWeight / totalQuantity;
-  }
-
-  print("📊 WEIGHT CALCULATION:");
-  print("Total Quantity: $totalQuantity");
-  print("Total Weight: $totalWeight");
-  print("Average Weight Per Item: $weightPerItem");
-
-  // Save to cache
-  ref
-      .read(orderCacheProvider.notifier)
-      .saveValue("quantity", totalQuantity.toString());
-  ref
-      .read(orderCacheProvider.notifier)
-      .saveValue("total_weight", totalWeight.toString());
-
-  final serviceType = selectedServiceTypeId ?? "standard";
-  final declaredValueStr = cache["declared_value"]?.toString() ?? "0";
-  final declaredValue = double.tryParse(declaredValueStr) ?? 0.0;
-  final dimensions = _getDimensionsFromCache(cache);
-
-  try {
-    await ref
-        .read(quoteControllerProvider.notifier)
-        .calculateMultiStopQuote(
-          productTypeId: productTypeId,
-          packagingTypeId: packagingTypeId,
-          stops: stops,
-          quantity: totalQuantity,
-          weightPerItem: weightPerItem,
-          serviceType: serviceType,
-          declaredValue: declaredValue,
-          addOns: selectedAddons,
-          length: dimensions['length'],
-          width: dimensions['width'],
-          height: dimensions['height'],
-        );
-  } catch (e) {
-    print("❌ MULTI-STOP ERROR DETAILS:");
-    print("Error Type: ${e.runtimeType}");
-    print("Error Message: $e");
-    rethrow;
-  }
-}
- 
   Map<String, double?> _getDimensionsFromCache(Map<String, dynamic> cache) {
     final length = cache["package_length"]?.toString();
     final width = cache["package_width"]?.toString();
@@ -1060,7 +1068,7 @@ Future<void> _calculateMultiStopQuotes({
                         bool canPlaceOrder = hasQuotes && bestQuote != null;
 
                         return CustomButton(
-                          text: "Place Order",
+                          text: "Payment Method",
                           backgroundColor: canPlaceOrder
                               ? AppColors.electricTeal
                               : AppColors.lightGrayBackground,
@@ -1105,11 +1113,19 @@ Future<void> _calculateMultiStopQuotes({
                                     },
                                     loading: () {},
                                     error: (e, _) {
-                                      ScaffoldMessenger.of(
+                                      Text("Payment check failed");
+
+                                      AppSnackBar.showError(
                                         context,
-                                      ).showSnackBar(
-                                        SnackBar(content: Text(e.toString())),
+                                        "Payment check failed",
                                       );
+                                      print("Payment check failed: $e");
+
+                                      // ScaffoldMessenger.of(
+                                      //   context,
+                                      // ).showSnackBar(
+                                      //   SnackBar(content: Text(e.toString())),
+                                      // );
                                     },
                                   );
                                 }

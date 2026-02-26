@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import '../../../../common_widgets/cuntom_textfield.dart';
 import '../../../../common_widgets/custom_button.dart';
 import '../../../../common_widgets/custom_text.dart';
@@ -64,9 +65,11 @@ class _RestPasswordScreenState extends ConsumerState<RestPasswordScreen> {
           if (data != null && data.success) {
             print("✅ Reset Password Success: ${data.toJson()}");
 
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(data.message)));
+            AppSnackBar.showSuccess(context, data.message);
+
+            // ScaffoldMessenger.of(
+            //   context,
+            // ).showSnackBar(SnackBar(content: Text(data.message)));
 
             /// ✅ Navigate to Login Screen
             Navigator.pushAndRemoveUntil(
@@ -79,9 +82,12 @@ class _RestPasswordScreenState extends ConsumerState<RestPasswordScreen> {
         loading: () {},
         error: (err, st) {
           print("❌ Reset Password Error: $err");
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(err.toString())));
+
+          AppSnackBar.showError(context, err.toString());
+
+          // ScaffoldMessenger.of(
+          //   context,
+          // ).showSnackBar(SnackBar(content: Text(err.toString())));
         },
       );
     });

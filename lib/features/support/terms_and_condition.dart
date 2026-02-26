@@ -61,29 +61,30 @@ class TermsPrivacyScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.electricTeal,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 50,
-                      vertical: 15,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    "Close",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ),
+
+              // Center(
+              //   child: ElevatedButton(
+              //     onPressed: () => Navigator.pop(context),
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: AppColors.electricTeal,
+              //       padding: const EdgeInsets.symmetric(
+              //         horizontal: 50,
+              //         vertical: 15,
+              //       ),
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //       ),
+              //     ),
+              //     child: const Text(
+              //       "Close",
+              //       style: TextStyle(
+              //         color: Colors.white,
+              //         fontWeight: FontWeight.bold,
+              //         fontSize: 16,
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),

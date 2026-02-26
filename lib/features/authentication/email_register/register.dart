@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/features/authentication/email_register/email_register_controller.dart';
+import 'package:logisticscustomer/features/support/terms_and_condition.dart';
 
 import '../../../constants/validation_regx.dart';
 import '../../../export.dart';
@@ -103,12 +105,37 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                               fontSize: 13,
                             ),
                           ),
-                          Text(
-                            "Terms of Use",
-                            style: TextStyle(
-                              color: AppColors.electricTeal,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => TermsPrivacyScreen(
+                                    title: "Terms & Conditions",
+                                    content: """
+1. Acceptance of Terms  
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+2. User Obligations  
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+3. Liability  
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+4. Governing Law  
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+""",
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              "Terms of Use",
+                              style: TextStyle(
+                                color: AppColors.electricTeal,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                           const Text(
@@ -118,12 +145,37 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                               fontSize: 13,
                             ),
                           ),
-                          Text(
-                            "Privacy Policy",
-                            style: TextStyle(
-                              color: AppColors.electricTeal,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => TermsPrivacyScreen(
+                                    title: "Privacy Policy",
+                                    content: """
+1. Acceptance of Terms  
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+2. User Obligations  
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+3. Liability  
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+4. Governing Law  
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+""",
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              "Privacy Policy",
+                              style: TextStyle(
+                                color: AppColors.electricTeal,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ],
@@ -175,12 +227,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         // .toString()
                         // .replaceFirst('Exception: ', '');
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Email Already Exist!"),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        AppSnackBar.showError(context, "Email Already Exist!");
+
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   SnackBar(
+                        //     content: Text("Email Already Exist!"),
+                        //     backgroundColor: Colors.red,
+                        //   ),
+                        // );
                       }
                     },
                   ),

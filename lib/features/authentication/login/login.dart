@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/features/authentication/login/login_controller.dart';
 
 import '../../../constants/validation_regx.dart';
@@ -173,7 +174,7 @@ class _LoginState extends ConsumerState<Login> {
                 child: CustomButton(
                   isChecked: _isFormFilled && !loginState.isLoading,
 
-                  text: loginState.isLoading ? "Processing..." : "Sign In",
+                  text: loginState.isLoading ? "Signing In..." : "Sign In",
 
                   backgroundColor: (_isFormFilled && !loginState.isLoading)
                       ? AppColors.electricTeal
@@ -204,12 +205,16 @@ class _LoginState extends ConsumerState<Login> {
                               (route) => false,
                             );
                           } else if (state is AsyncError) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Invalid email or password"),
-                                backgroundColor: Colors.red,
-                              ),
+                            AppSnackBar.showError(
+                              context,
+                              "Invalid email or password",
                             );
+                            // ScaffoldMessenger.of(context).showSnackBar(
+                            //   const SnackBar(
+                            //     content: Text("Invalid email or password"),
+                            //     backgroundColor: Colors.red,
+                            //   ),
+                            // );
                           }
                         }
                       : null,

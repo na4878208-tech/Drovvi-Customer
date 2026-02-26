@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/features/authentication/register_successful.dart';
 import 'package:logisticscustomer/features/home/orders_flow/create_orders_screens/order_cache_provider.dart';
 import 'package:logisticscustomer/features/home/orders_flow/create_orders_screens/pickup_location/dropdown.dart';
@@ -138,9 +139,10 @@ class _SetUpProfileState extends ConsumerState<SetUpProfile> {
       if (next is AsyncLoading) return;
 
       if (next is AsyncError) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(next.error.toString())));
+        AppSnackBar.showError(context, next.error.toString());
+        // ScaffoldMessenger.of(
+        //   context,
+        // ).showSnackBar(SnackBar(content: Text(next.error.toString())));
       }
       print("VERIFICATION TOKEN => ${widget.verificationToken}");
 
@@ -327,14 +329,18 @@ class _SetUpProfileState extends ConsumerState<SetUpProfile> {
               CustomAnimatedTextField(
                 controller: mobileController,
                 focusNode: mobileFocus,
-                labelText: "Mobile Number",
-                hintText: "Mobile Number",
+                labelText: "Phone Number",
+                hintText: "Phone Number",
                 prefixIcon: Icons.phone_outlined,
                 iconColor: AppColors.electricTeal,
                 borderColor: AppColors.electricTeal,
                 textColor: AppColors.mediumGray,
                 keyboardType: TextInputType.phone,
                 validator: AppValidators.phone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(11),
+                ],
               ),
               const SizedBox(height: 10),
 
@@ -342,8 +348,8 @@ class _SetUpProfileState extends ConsumerState<SetUpProfile> {
               CustomAnimatedTextField(
                 controller: addressController,
                 focusNode: addressFocus,
-                labelText: "Address (Optional)",
-                hintText: "Address (Optional)",
+                labelText: "Address",
+                hintText: "Address",
                 prefixIcon: Icons.person_outline,
                 iconColor: AppColors.electricTeal,
                 borderColor: AppColors.electricTeal,
@@ -378,7 +384,7 @@ class _SetUpProfileState extends ConsumerState<SetUpProfile> {
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: CustomButton(
                   isChecked: isButtonEnabled && state is! AsyncLoading,
-                  text: state is AsyncLoading ? "Submitting..." : "Next",
+                  text: state is AsyncLoading ? "Submitting..." : "Welcome!",
                   backgroundColor: AppColors.electricTeal,
                   borderColor: AppColors.electricTeal,
                   textColor: AppColors.pureWhite,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/constants/colors.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -153,13 +154,16 @@ class _PaymentMethodModalState extends ConsumerState<PaymentMethodModal> {
       }
     } catch (e) {
       print("❌ Error placing order: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
-        ),
-      );
+
+      AppSnackBar.showError(context, "Payment failed : Please try again");
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text(e.toString()),
+      //     backgroundColor: Colors.red,
+      //     duration: const Duration(seconds: 5),
+      //   ),
+      // );
     }
   }
 
@@ -255,7 +259,7 @@ class _PaymentMethodModalState extends ConsumerState<PaymentMethodModal> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                "Payment methods",
+                "Payment Methods",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               IconButton(
@@ -331,11 +335,13 @@ class _PaymentMethodModalState extends ConsumerState<PaymentMethodModal> {
 class PaymentWebViewScreen extends ConsumerStatefulWidget {
   final String checkoutUrl;
   final int orderId; // 👈 add this
+  final String reference;
 
   const PaymentWebViewScreen({
     super.key,
     required this.checkoutUrl,
-    required this.orderId,
+    this.orderId = 0, // 👈 default value
+    this.reference = "",
   });
 
   @override
@@ -385,69 +391,71 @@ class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
   }
 
   void _checkPaymentResult(String url) async {
-  final successPatterns = [
-    'success',
-    'thank-you',
-    'thank_you',
-    'completed',
-    'payment-success',
-    'checkout/success',
-  ];
+    final successPatterns = [
+      'success',
+      'thank-you',
+      'thank_you',
+      'completed',
+      'payment-success',
+      'checkout/success',
+    ];
 
-  for (var pattern in successPatterns) {
-    if (url.toLowerCase().contains(pattern)) {
-      if (_paymentCompleted) return;
-      _paymentCompleted = true;
+    for (var pattern in successPatterns) {
+      if (url.toLowerCase().contains(pattern)) {
+        if (_paymentCompleted) return;
+        _paymentCompleted = true;
 
-      try {
-        print("🔄 Payment success detected, waiting for backend update...");
+        try {
+          print("🔄 Payment success detected, waiting for backend update...");
 
-        final repository = ref.read(placeOrderRepositoryProvider);
+          final repository = ref.read(placeOrderRepositoryProvider);
 
-        Order updatedOrder;
-        int retryCount = 0;
+          Order updatedOrder;
+          int retryCount = 0;
 
-        // ⏳ Retry max 5 times (every 1.5 sec)
-        do {
-          await Future.delayed(const Duration(milliseconds: 1500));
-          updatedOrder = await repository.getOrderById(widget.orderId);
+          // ⏳ Retry max 5 times (every 1.5 sec)
+          do {
+            await Future.delayed(const Duration(milliseconds: 1500));
+            updatedOrder = await repository.getOrderById(widget.orderId);
 
-          print("🔁 Retry $retryCount → Payment Status: ${updatedOrder.paymentStatus}");
+            print(
+              "🔁 Retry $retryCount → Payment Status: ${updatedOrder.paymentStatus}",
+            );
 
-          retryCount++;
-        } while (
-            updatedOrder.paymentStatus.toLowerCase() != "paid" &&
-            retryCount < 5);
+            retryCount++;
+          } while (updatedOrder.paymentStatus.toLowerCase() != "paid" &&
+              retryCount < 5);
 
-        if (!mounted) return;
+          if (!mounted) return;
 
-        rootNavigatorKey.currentState?.pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (_) => OrderSuccessful(
-              orderNumber: updatedOrder.orderNumber,
-              status: updatedOrder.status,
-              totalAmount: updatedOrder.finalCost,
-              createedAt: updatedOrder.createdAt,
-              distanceKm: updatedOrder.distanceKm,
-              finalCost: updatedOrder.finalCost,
-              trackingCode: updatedOrder.trackingCode,
-              totalWeightKg: updatedOrder.totalWeightKg,
-              paymentMethod: "card",
-              paymentStatus: updatedOrder.paymentStatus,
+          rootNavigatorKey.currentState?.pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => OrderSuccessful(
+                orderNumber: updatedOrder.orderNumber,
+                status: updatedOrder.status,
+                totalAmount: updatedOrder.finalCost,
+                createedAt: updatedOrder.createdAt,
+                distanceKm: updatedOrder.distanceKm,
+                finalCost: updatedOrder.finalCost,
+                trackingCode: updatedOrder.trackingCode,
+                totalWeightKg: updatedOrder.totalWeightKg,
+                paymentMethod: "card",
+                paymentStatus: updatedOrder.paymentStatus,
+              ),
             ),
-          ),
-          (route) => false,
-        );
+            (route) => false,
+          );
 
-        print("✅ Final Payment Status: ${updatedOrder.paymentStatus}");
-      } catch (e) {
-        print("❌ Error fetching updated order: $e");
+          print("✅ Final Payment Status: ${updatedOrder.paymentStatus}");
+        } catch (e) {
+          print("❌ Error fetching updated order: $e");
+        }
+
+        return;
       }
-
-      return;
     }
   }
-}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -513,11 +521,11 @@ class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(color: Colors.teal),
-                  SizedBox(height: 16),
-                  Text(
-                    "Loading payment gateway...",
-                    style: TextStyle(color: Colors.teal, fontSize: 16),
-                  ),
+                  // SizedBox(height: 16),
+                  // Text(
+                  //   "Loading payment gateway...",
+                  //   style: TextStyle(color: Colors.teal, fontSize: 16),
+                  // ),
                 ],
               ),
             ),

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/constants/jwt.dart';
 import 'package:logisticscustomer/constants/local_storage.dart';
 import 'package:logisticscustomer/constants/userService.dart';
@@ -11,11 +12,8 @@ import '../../constants/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 // ✅ Add these imports for JWT token
 import 'package:jwt_decode/jwt_decode.dart';
-
-
 
 // class NotificationScreen extends StatefulWidget {
 //   const NotificationScreen({super.key});
@@ -577,7 +575,6 @@ import 'package:jwt_decode/jwt_decode.dart';
 //   }
 // }
 
-
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
 
@@ -596,46 +593,56 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // ✅ Temporary: Pehle token debug karo
     _debugTokenInfo().then((_) {
       _loadNotifications();
     });
-  } 
+  }
 
-   Future<void> _debugTokenInfo() async {
+  Future<void> _debugTokenInfo() async {
     print('=== TOKEN DEBUG INFO ===');
     final token = await LocalStorage.getToken();
     print('Token exists: ${token != null}');
-    
+
     if (token != null) {
       print('Token length: ${token.length}');
-      print('Token first 50 chars: ${token.substring(0, min(50, token.length))}...');
-      
+      print(
+        'Token first 50 chars: ${token.substring(0, min(50, token.length))}...',
+      );
+
       // Try to parse JWT
       try {
         Map<String, dynamic> payload = Jwt.parseJwt(token);
         print('✅ JWT parsed successfully');
         print('Payload keys: ${payload.keys}');
-        
+
         // Check for common user ID keys
-        final possibleKeys = ['id', 'userId', 'user_id', '_id', 'sub', 'user.id', 'user._id'];
+        final possibleKeys = [
+          'id',
+          'userId',
+          'user_id',
+          '_id',
+          'sub',
+          'user.id',
+          'user._id',
+        ];
         for (var key in possibleKeys) {
           if (payload[key] != null) {
             print('   Found "$key": ${payload[key]}');
           }
         }
-        
+
         // If no key found, print full payload
         bool found = false;
         for (var key in payload.keys) {
-          if (key.toString().toLowerCase().contains('id') || 
+          if (key.toString().toLowerCase().contains('id') ||
               key.toString().toLowerCase().contains('user')) {
             print('   🔑 "$key": ${payload[key]}');
             found = true;
           }
         }
-        
+
         if (!found) {
           print('   Full payload: $payload');
         }
@@ -646,200 +653,210 @@ class _NotificationScreenState extends State<NotificationScreen> {
     print('=== END DEBUG INFO ===');
   }
 
-Future<void> _loadNotifications() async {
-  try {
-    print('=== 🔔 LOADING NOTIFICATIONS ===');
-    
-    // 1. Get token
-    final token = await LocalStorage.getToken();
-    if (token == null) {
-      print('❌ No token in LocalStorage');
-      setState(() { isLoading = false; });
-      return;
-    }
-    
-    print('📱 Token found (length: ${token.length})');
-    
-    // 2. Parse token and extract userId
-    String? userId;
-    
+  Future<void> _loadNotifications() async {
     try {
-      Map<String, dynamic> payload = Jwt.parseJwt(token);
-      print('✅ JWT parsed successfully');
-      
-      // DEBUG: Print first few key-value pairs
-      print('🔍 JWT Structure:');
-      int count = 0;
-      payload.forEach((key, value) {
-        if (count < 10) { // Limit output
-          print('   $key: $value');
-          count++;
-        }
-      });
-      
-      // ✅ SIMPLE FIX: Just print and manually check
-      print('\n🎯 MANUAL CHECK NEEDED:');
-      print('1. Look for any ID field in above output');
-      print('2. Common fields: id, userId, user_id, _id, sub, uid');
-      print('3. If you see something like "id": "123", use that');
-      
-      // Try to auto-detect
-      final possibleKeys = ['id', 'userId', 'user_id', '_id', 'sub', 'uid'];
-      for (var key in possibleKeys) {
-        if (payload.containsKey(key)) {
-          userId = payload[key]?.toString();
-          print('✅ Auto-detected: $key = $userId');
-          break;
-        }
+      print('=== 🔔 LOADING NOTIFICATIONS ===');
+
+      // 1. Get token
+      final token = await LocalStorage.getToken();
+      if (token == null) {
+        print('❌ No token in LocalStorage');
+        setState(() {
+          isLoading = false;
+        });
+        return;
       }
-      
-    } catch (e) {
-      print('❌ JWT parse failed: $e');
+
+      print('📱 Token found (length: ${token.length})');
+
+      // 2. Parse token and extract userId
+      String? userId;
+
+      try {
+        Map<String, dynamic> payload = Jwt.parseJwt(token);
+        print('✅ JWT parsed successfully');
+
+        // DEBUG: Print first few key-value pairs
+        print('🔍 JWT Structure:');
+        int count = 0;
+        payload.forEach((key, value) {
+          if (count < 10) {
+            // Limit output
+            print('   $key: $value');
+            count++;
+          }
+        });
+
+        // ✅ SIMPLE FIX: Just print and manually check
+        print('\n🎯 MANUAL CHECK NEEDED:');
+        print('1. Look for any ID field in above output');
+        print('2. Common fields: id, userId, user_id, _id, sub, uid');
+        print('3. If you see something like "id": "123", use that');
+
+        // Try to auto-detect
+        final possibleKeys = ['id', 'userId', 'user_id', '_id', 'sub', 'uid'];
+        for (var key in possibleKeys) {
+          if (payload.containsKey(key)) {
+            userId = payload[key]?.toString();
+            print('✅ Auto-detected: $key = $userId');
+            break;
+          }
+        }
+      } catch (e) {
+        print('❌ JWT parse failed: $e');
+      }
+
+      // 3. If still no userId, use manual/hardcoded
+      if (userId == null || userId.isEmpty) {
+        print('⚠️ Could not extract userId from token');
+
+        // ✅ TEMPORARY FIX: Manually enter your Firebase user ID
+        // Go to Firebase Console > Firestore > users collection
+        // Copy your user document ID and paste here
+        userId =
+            "PASTE_YOUR_FIREBASE_USER_ID_HERE"; // Example: "uid123", "user_abc"
+
+        print('⚠️ Using hardcoded userId: $userId');
+        print('   (This is for testing only - fix JWT parsing later)');
+      }
+
+      print('🎯 Final userId for query: $userId');
+
+      // 4. Now query Firestore
+      setState(() {
+        isLoading = true;
+      });
+
+      final QuerySnapshot snapshot = await _firestore
+          .collection('notifications')
+          .where('userId', isEqualTo: userId)
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .get();
+
+      print(
+        '📡 Firestore query completed: ${snapshot.docs.length} notifications found',
+      );
+
+      if (snapshot.docs.isNotEmpty) {
+        // Process notifications...
+        notifications = snapshot.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return {
+            'id': doc.id,
+            'title': data['title'] ?? 'New Notification',
+            'subtitle': data['body'] ?? '',
+            'time': _formatTime(data['createdAt']),
+            'type': data['type'] ?? 'general',
+            'read': data['read'] ?? false,
+            'data': data['data'] ?? {},
+          };
+        }).toList();
+
+        hasNotifications = true;
+        print('✅ ${notifications.length} notifications loaded');
+      } else {
+        print('ℹ️ No notifications in Firestore, checking orders...');
+        await _loadFromOrdersHistory(userId);
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    } catch (error) {
+      print('❌ Error loading notifications: $error');
+      setState(() {
+        isLoading = false;
+      });
     }
-    
-    // 3. If still no userId, use manual/hardcoded
-    if (userId == null || userId.isEmpty) {
-      print('⚠️ Could not extract userId from token');
-      
-      // ✅ TEMPORARY FIX: Manually enter your Firebase user ID
-      // Go to Firebase Console > Firestore > users collection
-      // Copy your user document ID and paste here
-      userId = "PASTE_YOUR_FIREBASE_USER_ID_HERE"; // Example: "uid123", "user_abc"
-      
-      print('⚠️ Using hardcoded userId: $userId');
-      print('   (This is for testing only - fix JWT parsing later)');
-    }
-    
-    print('🎯 Final userId for query: $userId');
-    
-    // 4. Now query Firestore
-    setState(() { isLoading = true; });
-    
-    final QuerySnapshot snapshot = await _firestore
-        .collection('notifications')
-        .where('userId', isEqualTo: userId)
-        .orderBy('createdAt', descending: true)
-        .limit(50)
-        .get();
-    
-    print('📡 Firestore query completed: ${snapshot.docs.length} notifications found');
-    
-    if (snapshot.docs.isNotEmpty) {
-      // Process notifications...
-      notifications = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return {
-          'id': doc.id,
-          'title': data['title'] ?? 'New Notification',
-          'subtitle': data['body'] ?? '',
-          'time': _formatTime(data['createdAt']),
-          'type': data['type'] ?? 'general',
-          'read': data['read'] ?? false,
-          'data': data['data'] ?? {},
-        };
-      }).toList();
-      
-      hasNotifications = true;
-      print('✅ ${notifications.length} notifications loaded');
-    } else {
-      print('ℹ️ No notifications in Firestore, checking orders...');
-      await _loadFromOrdersHistory(userId);
-    }
-    
-    setState(() { isLoading = false; });
-    
-  } catch (error) {
-    print('❌ Error loading notifications: $error');
-    setState(() { isLoading = false; });
   }
-}
   // ✅ Add this function to get userId from JWT token
-// String? getUserIdFromToken(String token) {
-//   try {
-//     print('🔍 Parsing JWT token for userId...');
-//     Map<String, dynamic> payload = Jwt.parseJwt(token);
-    
-//     // ✅ Print ALL keys for debugging
-//     print('📋 All JWT payload keys: ${payload.keys.toList()}');
-    
-//     // ✅ Try ALL possible key combinations
-//     String? userId;
-    
-//     // Common JWT structures
-//     userId = payload['id']?.toString();
-//     if (userId != null) {
-//       print('✅ Found userId in "id": $userId');
-//       return userId;
-//     }
-    
-//     userId = payload['userId']?.toString();
-//     if (userId != null) {
-//       print('✅ Found userId in "userId": $userId');
-//       return userId;
-//     }
-    
-//     userId = payload['user_id']?.toString();
-//     if (userId != null) {
-//       print('✅ Found userId in "user_id": $userId');
-//       return userId;
-//     }
-    
-//     userId = payload['_id']?.toString();
-//     if (userId != null) {
-//       print('✅ Found userId in "_id": $userId');
-//       return userId;
-//     }
-    
-//     userId = payload['sub']?.toString();  // JWT standard subject field
-//     if (userId != null) {
-//       print('✅ Found userId in "sub": $userId');
-//       return userId;
-//     }
-    
-//     userId = payload['uid']?.toString();
-//     if (userId != null) {
-//       print('✅ Found userId in "uid": $userId');
-//       return userId;
-//     }
-    
-//     // If none of the above, check nested structures
-//     if (payload['user'] != null && payload['user'] is Map) {
-//       final userMap = payload['user'] as Map;
-//       userId = userMap['id']?.toString() ?? 
-//                userMap['userId']?.toString() ?? 
-//                userMap['_id']?.toString();
-//       if (userId != null) {
-//         print('✅ Found userId in nested "user" object: $userId');
-//         return userId;
-//       }
-//     }
-    
-//     if (payload['data'] != null && payload['data'] is Map) {
-//       final dataMap = payload['data'] as Map;
-//       userId = dataMap['id']?.toString() ?? 
-//                dataMap['userId']?.toString() ?? 
-//                dataMap['_id']?.toString();
-//       if (userId != null) {
-//         print('✅ Found userId in nested "data" object: $userId');
-//         return userId;
-//       }
-//     }
-    
-//     // Last resort: Print entire payload to see structure
-//     print('❌ No standard userId field found');
-//     print('📄 Full JWT payload:');
-//     payload.forEach((key, value) {
-//       print('   $key: $value (${value.runtimeType})');
-//     });
-    
-//     return null;
-    
-//   } catch (e) {
-//     print('❌ JWT parse error: $e');
-//     return null;
-//   }
-// }
- 
+  // String? getUserIdFromToken(String token) {
+  //   try {
+  //     print('🔍 Parsing JWT token for userId...');
+  //     Map<String, dynamic> payload = Jwt.parseJwt(token);
+
+  //     // ✅ Print ALL keys for debugging
+  //     print('📋 All JWT payload keys: ${payload.keys.toList()}');
+
+  //     // ✅ Try ALL possible key combinations
+  //     String? userId;
+
+  //     // Common JWT structures
+  //     userId = payload['id']?.toString();
+  //     if (userId != null) {
+  //       print('✅ Found userId in "id": $userId');
+  //       return userId;
+  //     }
+
+  //     userId = payload['userId']?.toString();
+  //     if (userId != null) {
+  //       print('✅ Found userId in "userId": $userId');
+  //       return userId;
+  //     }
+
+  //     userId = payload['user_id']?.toString();
+  //     if (userId != null) {
+  //       print('✅ Found userId in "user_id": $userId');
+  //       return userId;
+  //     }
+
+  //     userId = payload['_id']?.toString();
+  //     if (userId != null) {
+  //       print('✅ Found userId in "_id": $userId');
+  //       return userId;
+  //     }
+
+  //     userId = payload['sub']?.toString();  // JWT standard subject field
+  //     if (userId != null) {
+  //       print('✅ Found userId in "sub": $userId');
+  //       return userId;
+  //     }
+
+  //     userId = payload['uid']?.toString();
+  //     if (userId != null) {
+  //       print('✅ Found userId in "uid": $userId');
+  //       return userId;
+  //     }
+
+  //     // If none of the above, check nested structures
+  //     if (payload['user'] != null && payload['user'] is Map) {
+  //       final userMap = payload['user'] as Map;
+  //       userId = userMap['id']?.toString() ??
+  //                userMap['userId']?.toString() ??
+  //                userMap['_id']?.toString();
+  //       if (userId != null) {
+  //         print('✅ Found userId in nested "user" object: $userId');
+  //         return userId;
+  //       }
+  //     }
+
+  //     if (payload['data'] != null && payload['data'] is Map) {
+  //       final dataMap = payload['data'] as Map;
+  //       userId = dataMap['id']?.toString() ??
+  //                dataMap['userId']?.toString() ??
+  //                dataMap['_id']?.toString();
+  //       if (userId != null) {
+  //         print('✅ Found userId in nested "data" object: $userId');
+  //         return userId;
+  //       }
+  //     }
+
+  //     // Last resort: Print entire payload to see structure
+  //     print('❌ No standard userId field found');
+  //     print('📄 Full JWT payload:');
+  //     payload.forEach((key, value) {
+  //       print('   $key: $value (${value.runtimeType})');
+  //     });
+
+  //     return null;
+
+  //   } catch (e) {
+  //     print('❌ JWT parse error: $e');
+  //     return null;
+  //   }
+  // }
+
   Future<void> _loadFromOrdersHistory(String userId) async {
     try {
       // User ke orders se notification-like data banaye
@@ -954,7 +971,7 @@ Future<void> _loadNotifications() async {
     // ✅ Get userId from JWT token
     final token = await LocalStorage.getToken();
     if (token == null) return;
-    
+
     final userId = getUserIdFromToken(token);
     if (userId == null) return;
 
@@ -977,9 +994,11 @@ Future<void> _loadNotifications() async {
         }
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('All notifications marked as read')),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text('All notifications marked as read')),
+      // );
+
+      AppSnackBar.showSuccess(context, "All notifications marked as read");
     } catch (error) {
       print('Error marking as read: $error');
     }
@@ -989,7 +1008,7 @@ Future<void> _loadNotifications() async {
     // ✅ Get userId from JWT token
     final token = await LocalStorage.getToken();
     if (token == null) return;
-    
+
     final userId = getUserIdFromToken(token);
     if (userId == null) return;
 
@@ -1012,7 +1031,7 @@ Future<void> _loadNotifications() async {
               try {
                 final query = await _firestore
                     .collection('notifications')
-                    .where('userId', isEqualTo: userId)  // ✅ Use userId
+                    .where('userId', isEqualTo: userId) // ✅ Use userId
                     .get();
 
                 final batch = _firestore.batch();
@@ -1027,9 +1046,7 @@ Future<void> _loadNotifications() async {
                   hasNotifications = false;
                 });
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('All notifications cleared')),
-                );
+                AppSnackBar.showSuccess(context, "All notifications cleared");
               } catch (error) {
                 print('Error clearing notifications: $error');
               }
@@ -1103,7 +1120,10 @@ Future<void> _loadNotifications() async {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.pureWhite),
+          icon: const Icon(
+            Icons.arrow_back_rounded,
+            color: AppColors.pureWhite,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -1338,10 +1358,6 @@ Future<void> _loadNotifications() async {
     }
   }
 }
-
-
-
-
 
 // class NotificationScreen extends StatefulWidget {
 //   const NotificationScreen({super.key});

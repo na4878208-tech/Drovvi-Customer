@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 
 import 'package:logisticscustomer/features/authentication/email_register/email_register_modal.dart';
 import 'package:logisticscustomer/features/authentication/otp/verify_otp_controller.dart';
@@ -65,22 +66,22 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                     Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Text(
-                "Back",
-                style: TextStyle(
-                  color: AppColors.electricTeal,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "Back",
+                      style: TextStyle(
+                        color: AppColors.electricTeal,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
                 const SizedBox(height: 20),
                 CustomText(
                   txt: "DROVVI",
@@ -185,7 +186,7 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: CustomButton(
                     isChecked: _isOtpFilled,
-                    text: "Submit",
+                    text: "Next",
                     backgroundColor: AppColors.electricTeal,
                     borderColor: AppColors.electricTeal,
                     textColor: AppColors.pureWhite,
@@ -250,15 +251,21 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                           _seconds = 59;
                         });
                         startTimer();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("OTP Resend Successfully"),
-                          ),
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   const SnackBar(
+                        //     content: Text("OTP Resend Successfully"),
+                        //   ),
+                        // );
+                        AppSnackBar.showSuccess(
+                          context,
+                          "OTP Resend Successfully",
                         );
                       } else if (state is AsyncError) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Process")),
-                        );
+                        AppSnackBar.showWarning(context, "Process");
+
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   const SnackBar(content: Text("Process")),
+                        // );
                       }
                     }
                   },

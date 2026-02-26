@@ -207,7 +207,7 @@ class AlOrder {
   String get statusText {
     switch (status) {
       case 'completed':
-        return 'Delivered';
+        return 'Completed';
       case 'assigned':
         return 'Assigned';
       case 'pending':

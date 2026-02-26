@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logisticscustomer/features/bottom_navbar/bottom_navbar_screen.dart';
-import 'package:logisticscustomer/features/home/orders_flow/all_orders/orders.dart';
 
 import '../../../../common_widgets/custom_text.dart';
 import '../../../../constants/colors.dart';
@@ -28,8 +27,13 @@ class OrderTrackingScreen extends ConsumerWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_outlined, size: 20),
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> TripsBottomNavBarScreen(initialIndex: 1,)));
-          }
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TripsBottomNavBarScreen(initialIndex: 1),
+              ),
+            );
+          },
         ),
       ),
       body: state.when(
@@ -126,178 +130,30 @@ class OrderTrackingScreen extends ConsumerWidget {
   }
 
   Widget _singleRouteCard(order) {
-  return _infoCard(
-    title: "Route Details",
-    icon: Icons.route,
-    children: [
-      _row("Pickup", order.pickupAddress),
-      _row("Delivery", order.deliveryAddress),
-    ],
-  );
-}
-
-Widget _multiStopTimeline(List<TrackOrderStop> stops) {
-  return Container(
-    padding: const EdgeInsets.all(18),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(22),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.06),
-          blurRadius: 12,
-          offset: const Offset(0, 6),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: const [
-            Icon(Icons.timeline, color: AppColors.electricTeal),
-            SizedBox(width: 10),
-            Text(
-              "Route Timeline",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        ...stops.map((stop) => _stopTile(stop)).toList(),
-      ],
-    ),
-  );
-}
-
-Widget _stopTile(TrackOrderStop stop) {
-  Color statusColor;
-
-  switch (stop.status) {
-    case "completed":
-      statusColor = Colors.green;
-      break;
-    case "arrived":
-      statusColor = AppColors.electricTeal;
-      break;
-    case "skipped":
-      statusColor = Colors.orange;
-      break;
-    default:
-      statusColor = Colors.grey;
-  }
-
-  return Container(
-    margin: const EdgeInsets.only(bottom: 14),
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: stop.isCurrent
-          ? AppColors.electricTeal.withOpacity(0.08)
-          : Colors.grey[50],
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: statusColor.withOpacity(0.4)),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 12,
-              backgroundColor: statusColor,
-              child: Text(
-                stop.sequence.toString(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              stop.type.toUpperCase(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: statusColor,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              stop.statusLabel,
-              style: TextStyle(
-                fontSize: 12,
-                color: statusColor,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 8),
-        Text(
-          stop.contactName,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          "${stop.address}, ${stop.city}",
-          style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-        ),
-
-        if (stop.arrivalTime != null) ...[
-          const SizedBox(height: 6),
-          Text(
-            "Arrived: ${stop.arrivalTime}",
-            style: const TextStyle(fontSize: 12),
-          ),
-        ],
-
-        if (stop.departureTime != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            "Departed: ${stop.departureTime}",
-            style: const TextStyle(fontSize: 12),
-          ),
-        ],
-      ],
-    ),
-  );
-}
-
- 
-
-  Widget _driverCard(order) {
     return _infoCard(
-      title: "Driver Details",
-      icon: Icons.person,
+      title: "Route Details",
+      subtitle: "Pickup & delivery information",
+      icon: Icons.route_outlined,
       children: [
-        _row("Name", order.driver.name),
-        _row("Phone", order.driver.phone),
-        _row("Rating", "${order.driver.rating} ⭐"),
+        _routeRow(
+          label: "PICKUP",
+          value: order.pickupAddress ?? "",
+          icon: Icons.upload_rounded,
+          color: AppColors.electricTeal,
+          isLast: false,
+        ),
+        _routeRow(
+          label: "DELIVERY",
+          value: order.deliveryAddress ?? "",
+          icon: Icons.download_rounded,
+          color: Colors.green,
+          isLast: true,
+        ),
       ],
     );
   }
 
-  Widget _vehicleCard(order) {
-    return _infoCard(
-      title: "Vehicle Details",
-      icon: Icons.local_shipping,
-      children: [
-        _row("Vehicle", "${order.vehicle.make} ${order.vehicle.model}"),
-        _row("Type", order.vehicle.type),
-        _row("Registration", order.vehicle.registration),
-      ],
-    );
-  }
-
-  Widget _infoCard({
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-  }) {
+  Widget _multiStopTimeline(List<TrackOrderStop> stops) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -315,46 +171,404 @@ Widget _stopTile(TrackOrderStop stop) {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            children: const [
+              Icon(Icons.timeline, color: AppColors.electricTeal),
+              SizedBox(width: 10),
+              Text(
+                "Route Timeline",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          ...stops.map((stop) => _stopTile(stop)).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _stopTile(TrackOrderStop stop) {
+    Color statusColor;
+
+    switch (stop.status) {
+      case "completed":
+        statusColor = Colors.green;
+        break;
+      case "arrived":
+        statusColor = AppColors.electricTeal;
+        break;
+      case "skipped":
+        statusColor = Colors.orange;
+        break;
+      default:
+        statusColor = Colors.grey;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: stop.isCurrent
+            ? AppColors.electricTeal.withOpacity(0.08)
+            : Colors.grey[50],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: statusColor.withOpacity(0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Icon(icon, color: AppColors.electricTeal),
+              CircleAvatar(
+                radius: 12,
+                backgroundColor: statusColor,
+                child: Text(
+                  stop.sequence.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
               const SizedBox(width: 10),
               Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
+                stop.type.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
+                  color: statusColor,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                stop.statusLabel,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: statusColor,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+
+          const SizedBox(height: 8),
+          Text(
+            stop.contactName,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "${stop.address}, ${stop.city}",
+            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+          ),
+
+          if (stop.arrivalTime != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              "Arrived: ${stop.arrivalTime}",
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
+
+          if (stop.departureTime != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              "Departed: ${stop.departureTime}",
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _driverCard(order) {
+    final driver = order.driver;
+
+    return _infoCard(
+      title: "Driver Details",
+      subtitle: "Assigned driver information",
+      icon: Icons.person_outline,
+      children: [
+        /// Driver Header
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 26,
+              backgroundColor: AppColors.electricTeal.withOpacity(0.1),
+              child: Text(
+                driver.name.isNotEmpty ? driver.name[0].toUpperCase() : "?",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.electricTeal,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    driver.name.isEmpty ? "-" : driver.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.star, size: 16, color: Colors.amber.shade600),
+                      const SizedBox(width: 4),
+                      Text(
+                        driver.rating?.toString() ?? "-",
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            if (driver.phone.isNotEmpty)
+              InkWell(
+                onTap: () {
+                  // implement call launch logic here
+                },
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.call, color: Colors.green, size: 20),
+                ),
+              ),
+          ],
+        ),
+
+        const SizedBox(height: 22),
+
+        Divider(color: Colors.grey.shade200),
+
+        const SizedBox(height: 18),
+
+        /// Phone Row
+        _detailRow(
+          icon: Icons.phone_outlined,
+          label: "Phone",
+          value: driver.phone,
+        ),
+      ],
+    );
+  }
+
+  Widget _vehicleCard(order) {
+    final vehicle = order.vehicle;
+
+    return _infoCard(
+      title: "Vehicle Details",
+      subtitle: "Assigned vehicle information",
+      icon: Icons.local_shipping_outlined,
+      children: [
+        /// Vehicle Name
+        Text(
+          "${vehicle.make} ${vehicle.model}".trim().isEmpty
+              ? "-"
+              : "${vehicle.make} ${vehicle.model}",
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+
+        const SizedBox(height: 18),
+
+        Divider(color: Colors.grey.shade200),
+
+        const SizedBox(height: 18),
+
+        _detailRow(
+          icon: Icons.category_outlined,
+          label: "Type",
+          value: vehicle.type,
+        ),
+
+        const SizedBox(height: 16),
+
+        _detailRow(
+          icon: Icons.confirmation_number_outlined,
+          label: "Registration",
+          value: vehicle.registration,
+        ),
+      ],
+    );
+  }
+
+  Widget _detailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Colors.grey.shade600),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value.isEmpty ? "-" : value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _infoCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// HEADER
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.electricTeal.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 20, color: AppColors.electricTeal),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          /// BODY
           ...children,
         ],
       ),
     );
   }
 
-  Widget _row(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+  Widget _routeRow({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color color,
+    required bool isLast,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        /// LEFT ICON + LINE
+        Column(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 14, color: color),
+            ),
+            if (!isLast)
+              Container(
+                width: 2,
+                height: 36,
+                margin: const EdgeInsets.symmetric(vertical: 4),
+                color: Colors.grey.shade300,
+              ),
+          ],
+        ),
+
+        const SizedBox(width: 14),
+
+        /// RIGHT CONTENT
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.4,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value.isEmpty ? "-" : value,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    height: 1.4,
+                  ),
+                ),
+              ],
             ),
           ),
-          Spacer(),
-          Expanded(
-            child: Text(
-              value.isEmpty ? "-" : value,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

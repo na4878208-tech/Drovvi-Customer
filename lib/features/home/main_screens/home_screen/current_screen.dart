@@ -10,6 +10,7 @@ import 'package:logisticscustomer/features/home/orders_flow/create_orders_screen
 import 'package:logisticscustomer/features/home/main_screens/home_screen/home_controller.dart';
 import 'package:logisticscustomer/features/home/main_screens/home_screen/view_all.dart';
 import 'package:logisticscustomer/features/home/notification_screen.dart';
+import 'package:logisticscustomer/features/home/orders_flow/ordr_tracking/order_tracking_screen.dart';
 import 'package:logisticscustomer/services/notification_service.dart';
 
 import 'package:shimmer/shimmer.dart';
@@ -217,7 +218,7 @@ class _CurrentScreenState extends ConsumerState<CurrentScreen> {
 
       // await NotificationService.initialize(userId);
 
-        await NotificationService.initialize();
+      await NotificationService.initialize();
 
       ref.read(dashboardControllerProvider.notifier).loadDashboard();
     });
@@ -381,191 +382,273 @@ class _CurrentScreenState extends ConsumerState<CurrentScreen> {
                           // ---- Active Orders ----
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              CustomText(
-                                txt: "Active Orders",
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.electricTeal,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CustomText(
+                                    txt: "Active Orders",
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.darkText,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  CustomText(
+                                    txt: "Currently ongoing deliveries",
+                                    fontSize: 12,
+                                    color: AppColors.mediumGray,
+                                  ),
+                                ],
                               ),
-
-                              GestureDetector(
+                              InkWell(
+                                borderRadius: BorderRadius.circular(20),
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => ActiveViewAll(),
+                                      builder: (_) => ActiveViewAll(),
                                     ),
                                   );
                                 },
-                                child: Row(
-                                  children: [
-                                    CustomText(
-                                      txt: "View All",
-                                      color: AppColors.electricTeal,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
-                                    ),
-                                    SizedBox(width: 4),
-                                    Icon(
-                                      Icons.arrow_forward,
-                                      size: 16,
-                                      color: AppColors.electricTeal,
-                                    ),
-                                  ],
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 6,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CustomText(
+                                        txt: "View All",
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        color: AppColors.electricTeal,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        Icons.arrow_forward,
+                                        size: 14,
+                                        color: AppColors.electricTeal,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          gapH4,
+
+                          gapH12,
 
                           // Active Orders ke tile me ye changes karein:
                           dashboard.data.activeOrders.isEmpty
                               ? Container(
-                                  padding: EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.pureWhite,
-                                    borderRadius: BorderRadius.circular(12),
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 30,
                                   ),
-                                  child: Center(
-                                    child: CustomText(
-                                      txt: "No active orders",
-                                      color: AppColors.mediumGray,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.grey.shade200,
                                     ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.inventory_2_outlined,
+                                        size: 40,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      CustomText(
+                                        txt: "No active orders",
+                                        fontSize: 14,
+                                        color: AppColors.mediumGray,
+                                      ),
+                                    ],
                                   ),
                                 )
                               : Column(
-                                  children: dashboard
-                                      .data
-                                      .activeOrders // <-- List<ActiveOrder> object
-                                      .take(3)
-                                      .map((order) {
-                                        // <-- 'order' ab ActiveOrder type ka object hai
-                                        return GestureDetector(
-                                          onTap: () {
-                                            // Yahan order.id ya order.trackingCode use kar sakte hain
-                                            print("Order ID: ${order.id}");
-                                            print(
-                                              "Tracking Code: ${order.trackingCode}",
-                                            );
-                                          },
-                                          child: Container(
-                                            margin: EdgeInsets.only(bottom: 12),
-                                            width: double.infinity,
-                                            padding: EdgeInsets.all(16),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.pureWhite,
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: AppColors.mediumGray
-                                                      .withOpacity(0.1),
-                                                  blurRadius: 6,
-                                                  offset: Offset(0, 3),
+                                  children: dashboard.data.activeOrders.take(3).map((
+                                    order,
+                                  ) {
+                                    return InkWell(
+                                      borderRadius: BorderRadius.circular(18),
+                                      onTap: () {
+                                        print("Order ID: ${order.id}");
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.only(
+                                          bottom: 16,
+                                        ),
+                                        padding: const EdgeInsets.all(18),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            18,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.grey.shade200,
+                                          ),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            /// Top Row (Order + Status Badge)
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                CustomText(
+                                                  txt: order.orderNumber,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: AppColors.darkText,
+                                                ),
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 4,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors
+                                                        .electricTeal
+                                                        .withOpacity(0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          20,
+                                                        ),
+                                                  ),
+                                                  child: CustomText(
+                                                    txt: order.status
+                                                        .toUpperCase(),
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        AppColors.electricTeal,
+                                                  ),
                                                 ),
                                               ],
                                             ),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+
+                                            const SizedBox(height: 14),
+
+                                            /// Route Section
+                                            Row(
                                               children: [
-                                                Row(
-                                                  children: [
-                                                    CustomText(
-                                                      txt: "Order: ",
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: AppColors
-                                                          .electricTeal,
-                                                    ),
-                                                    CustomText(
-                                                      txt: order
-                                                          .orderNumber, // <-- DIRECT ACCESS
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: AppColors.darkText,
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: 8),
-                                                Row(
+                                                Column(
                                                   children: [
                                                     Icon(
                                                       Icons.circle,
-                                                      size: 12,
+                                                      size: 10,
                                                       color: AppColors
                                                           .electricTeal,
                                                     ),
-                                                    SizedBox(width: 6),
-                                                    CustomText(
-                                                      txt: order.status
-                                                          .toUpperCase(), // <-- DIRECT ACCESS
+                                                    Container(
+                                                      width: 2,
+                                                      height: 24,
                                                       color:
-                                                          AppColors.mediumGray,
+                                                          Colors.grey.shade300,
                                                     ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: 6),
-                                                Row(
-                                                  children: [
                                                     Icon(
-                                                      Icons
-                                                          .location_on_outlined,
+                                                      Icons.location_on,
                                                       size: 14,
-                                                      color:
-                                                          AppColors.mediumGray,
-                                                    ),
-                                                    SizedBox(width: 4),
-                                                    Expanded(
-                                                      child: CustomText(
-                                                        txt:
-                                                            "${order.pickupCity} to ${order.deliveryCity}", // <-- DIRECT ACCESS
-                                                        fontSize: 13,
-                                                        color: AppColors
-                                                            .mediumGray,
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                      ),
+                                                      color: Colors.red,
                                                     ),
                                                   ],
                                                 ),
-                                                SizedBox(height: 8),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.end,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        CustomText(
-                                                          txt: "Track Order",
-                                                          color: AppColors
-                                                              .electricTeal,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          fontSize: 14,
-                                                        ),
-                                                        SizedBox(width: 4),
-                                                        Icon(
-                                                          Icons.arrow_forward,
-                                                          size: 12,
-                                                          color: AppColors
-                                                              .electricTeal,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      CustomText(
+                                                        txt: order.pickupCity,
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color:
+                                                            AppColors.darkText,
+                                                      ),
+                                                      const SizedBox(height: 6),
+                                                      CustomText(
+                                                        txt: order.deliveryCity,
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color:
+                                                            AppColors.darkText,
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                        );
-                                      })
-                                      .toList(),
+
+                                            Divider(
+                                              color: Colors.grey.shade200,
+                                            ),
+
+                                            /// Bottom Row
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                CustomText(
+                                                  txt:
+                                                      "Tracking: ${order.trackingCode}",
+                                                  fontSize: 12,
+                                                  color: AppColors.mediumGray,
+                                                ),
+                                                InkWell(
+                                                  onTap: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (_) =>
+                                                            OrderTrackingScreen(
+                                                              trackingCode: order
+                                                                  .trackingCode,
+                                                            ),
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: Row(
+                                                    children: [
+                                                      CustomText(
+                                                        txt: "Track Order",
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: AppColors
+                                                            .electricTeal,
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Icon(
+                                                        Icons.arrow_forward,
+                                                        size: 12,
+                                                        color: AppColors
+                                                            .electricTeal,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
+
                           gapH24,
 
                           // ---- Recent Orders ----
@@ -620,7 +703,8 @@ class _CurrentScreenState extends ConsumerState<CurrentScreen> {
                                   ),
                                   child: Center(
                                     child: CustomText(
-                                      txt: "No recent orders",
+                                      txt: "no recent orders",
+                                      fontSize: 14,
                                       color: AppColors.mediumGray,
                                     ),
                                   ),

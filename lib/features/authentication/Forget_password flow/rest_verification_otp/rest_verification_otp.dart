@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import '../../../../constants/validation_regx.dart';
 import '../../../../export.dart';
 import '../forget_password/forget_password_model.dart';
@@ -251,11 +252,15 @@ class _RestVerificationScreenState
                         );
                         setState(() => _seconds = 59);
                         startTimer();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("OTP resent successfully"),
-                          ),
+                        AppSnackBar.showSuccess(
+                          context,
+                          "OTP resent successfully",
                         );
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   const SnackBar(
+                        //     content: Text("OTP resent successfully"),
+                        //   ),
+                        // );
                       }
                     }
                   },

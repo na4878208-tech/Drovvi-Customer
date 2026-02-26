@@ -1,71 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logisticscustomer/constants/local_storage.dart';
-import 'package:logisticscustomer/features/home/order_successful.dart';
 import 'package:logisticscustomer/features/home/orders_flow/all_orders/get_all_orders_modal.dart';
 import 'package:logisticscustomer/features/home/orders_flow/all_orders/orders_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:logisticscustomer/features/home/orders_flow/create_orders_screens/fetch_order/place_order_modal.dart';
 import 'package:logisticscustomer/features/home/orders_flow/payment_method_orders/payment_method_screen.dart';
-import 'package:logisticscustomer/features/home/wallet_flow/yoco_payment_webview.dart';
 import 'dart:convert';
 import '../../../../export.dart';
 
-import 'package:webview_flutter/webview_flutter.dart';
 
-// class PaymentWebViewScreen extends StatefulWidget {
-//   final String url;
-//   final VoidCallback onPaymentComplete;
-
-//   const PaymentWebViewScreen({
-//     Key? key,
-//     required this.url,
-//     required this.onPaymentComplete,
-//   }) : super(key: key);
-
-//   @override
-//   State<PaymentWebViewScreen> createState() => _PaymentWebViewScreenState();
-// }
-
-// class _PaymentWebViewScreenState extends State<PaymentWebViewScreen> {
-//   late final WebViewController _controller;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _controller = WebViewController()
-//       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-//       ..setNavigationDelegate(
-//         NavigationDelegate(
-//           onNavigationRequest: (request) {
-//             // Check if payment is complete
-//             if (request.url.contains('success') ||
-//                 request.url.contains('completed')) {
-//               widget.onPaymentComplete();
-//               Navigator.pop(context);
-//               return NavigationDecision.prevent;
-//             }
-//             return NavigationDecision.navigate;
-//           },
-//         ),
-//       )
-//       ..loadRequest(Uri.parse(widget.url));
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text("Complete Payment"),
-//         leading: IconButton(
-//           onPressed: () => Navigator.pop(context),
-//           icon: Icon(Icons.close),
-//         ),
-//       ),
-//       body: WebViewWidget(controller: _controller),
-//     );
-//   }
-// }
 
 class PaymentOptionsModal extends ConsumerStatefulWidget {
   final AlOrder order;
@@ -92,7 +36,7 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
 
     try {
       // Replace with your actual API base URL
-      final baseUrl = 'https://drovvi.com/api/v1/customer/payment';
+      final baseUrl = 'seedlink.skyguruu.com/api/v1/customer/payment';
       final url = Uri.parse('$baseUrl/orders/${widget.order.id}/pay-wallet');
 
       // Get token from your storage (adjust as per your auth implementation)
@@ -150,7 +94,7 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
     });
 
     try {
-      final baseUrl = 'https://drovvi.com/api/v1/customer/payment';
+      final baseUrl = 'seedlink.skyguruu.com/api/v1/customer/payment';
       final url = Uri.parse('$baseUrl/orders/${widget.order.id}/pay-card');
 
       // final token = await _getAuthToken();
@@ -240,45 +184,15 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => YocoPaymentWebView(
-          // checkoutUrl: payment.checkoutUrl,
-          reference: payment!.reference,
-
-          checkoutUrl: payment.checkoutUrl,
-          // amount: payment.amount,
-          // orderNumber: orderResponse.data.order.orderNumber,
+        builder: (_) => PaymentWebViewScreen(
+          checkoutUrl: payment!.checkoutUrl,
+          reference: payment.reference,
+           orderId: widget.order.id ?? 0 
+          // orderId: order.id,
         ),
-
-        // PaymentWebViewScreen(
-        //   checkoutUrl: payment!.checkoutUrl,
-        //   amount: payment.amount,
-        //   orderNumber: orderResponse.data.order.orderNumber,
-        //   onPaymentSuccess: () {
-        //     // Payment successful hone ke baad
-        //     // IMPORTANT: Sab screens clear karo aur OrderSuccessful pe jao
-
-        //   },
-        // ),
       ),
     );
 
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => PaymentWebViewScreen(
-    //       url: url,
-    //       onPaymentComplete: () {
-    //         widget.ref.read(orderControllerProvider.notifier).refreshOrders();
-    //         ScaffoldMessenger.of(context).showSnackBar(
-    //           SnackBar(
-    //             content: Text('Payment completed successfully!'),
-    //             backgroundColor: Colors.green,
-    //           ),
-    //         );
-    //       },
-    //     ),
-    //   ),
-    // );
   }
 
   @override

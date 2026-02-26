@@ -933,8 +933,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/features/home/orders_flow/create_orders_screens/main_order_create_screen.dart';
 import 'package:logisticscustomer/features/home/main_screens/home_screen/home_controller.dart';
+import 'package:logisticscustomer/features/home/orders_flow/ordr_tracking/order_tracking_screen.dart';
 import '../../../../export.dart';
 import '../../orders_flow/order details/order_details_screen.dart';
 
@@ -996,8 +998,8 @@ class _ActiveViewAllState extends ConsumerState<ActiveViewAll> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.local_shipping, size: 64, color: AppColors.mediumGray),
-          const SizedBox(height: 16),
+          Icon(Icons.local_shipping, size: 64, color: AppColors.electricTeal),
+          gapH12,
           CustomText(
             txt: "No Active Orders",
             fontSize: 16,
@@ -1010,7 +1012,7 @@ class _ActiveViewAllState extends ConsumerState<ActiveViewAll> {
             fontSize: 14,
             color: AppColors.mediumGray.withOpacity(0.7),
           ),
-          const SizedBox(height: 24),
+          gapH12,
           ElevatedButton(
             onPressed: () => Navigator.push(
               context,
@@ -1022,9 +1024,13 @@ class _ActiveViewAllState extends ConsumerState<ActiveViewAll> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: Text("Create New Order"),
+              child: CustomText(
+                fontSize: 14,
+                txt: "Create New Order",
+                color: AppColors.pureWhite,
+              ),
             ),
           ),
         ],
@@ -1090,7 +1096,7 @@ class _RecentViewAllState extends ConsumerState<RecentViewAll> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inbox_outlined, size: 64, color: AppColors.mediumGray),
+          Icon(Icons.inbox_outlined, size: 64, color: AppColors.electricTeal),
           const SizedBox(height: 16),
           CustomText(
             txt: "No Recent Orders",
@@ -1200,11 +1206,16 @@ class OrderCard extends StatelessWidget {
                               Clipboard.setData(
                                 ClipboardData(text: trackingCode!),
                               );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Tracking code copied"),
-                                  duration: Duration(seconds: 1),
-                                ),
+                              // ScaffoldMessenger.of(context).showSnackBar(
+                              //   const SnackBar(
+                              //     content: Text("Tracking code copied"),
+                              //     duration: Duration(seconds: 1),
+                              //   ),
+                              // );
+
+                              AppSnackBar.showSuccess(
+                                context,
+                                "Tracking code copied",
                               );
                             },
                             child: const Icon(
@@ -1314,7 +1325,16 @@ class OrderCard extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                        onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => OrderTrackingScreen(
+                                  trackingCode: trackingCode!,
+                                ),
+                              ),
+                            );
+                          },
                       icon: const Icon(
                         Icons.map_outlined,
                         size: 16,
