@@ -1,4 +1,4 @@
-package com.skyguru.logisticscustomer
+package com.yourcompany.logisticscustomer
 
 import io.flutter.embedding.android.FlutterActivity
 

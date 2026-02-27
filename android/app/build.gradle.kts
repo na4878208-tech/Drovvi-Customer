@@ -15,12 +15,12 @@ plugins {
 }
 
 android {
-    namespace = "com.skyguru.logisticscustomer"
+    namespace = "com.yourcompany.logisticscustomer"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     defaultConfig {
-        applicationId = "com.skyguru.logisticscustomer"
+        applicationId = "com.yourcompany.logisticscustomer"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
         versionCode = flutter.versionCode
