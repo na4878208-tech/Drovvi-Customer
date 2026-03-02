@@ -636,7 +636,7 @@ class OrderDetailsScreen extends ConsumerWidget {
     String address,
     String city,
     String state,
-    String contactPhone
+    String contactPhone,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),

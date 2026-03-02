@@ -213,31 +213,23 @@ class Driver {
   final String phone;
   final String rating;
 
-  Driver({required this.name, required this.phone, required this.rating});
+  Driver({
+    required this.name,
+    required this.phone,
+    required this.rating,
+  });
 
   factory Driver.fromJson(dynamic json) {
-    if (json == null || json is! Map<String, dynamic>) {
-      return Driver(name: "", phone: "", rating: "");
-    }
-
-    return Driver(
-      name: json["name"] ?? "",
-      phone: json["phone"] ?? "",
-      rating: json["rating"]?.toString() ?? "",
-    );
+  if (json == null || json is! Map<String, dynamic>) {
+    return Driver(name: "", phone: "", rating: "");
   }
 
-  // factory Driver.fromJson(dynamic json) {
-  //   if (json == null || json is! Map<String, dynamic>) {
-  //     return Driver(name: "", phone: "", rating: "");
-  //   }
-
-  //   return Driver(
-  //     name: json["user"]?["name"] ?? "",
-  //     phone: json["user"]?["phone"] ?? "",
-  //     rating: json["rating"]?.toString() ?? "",
-  //   );
-  // }
+  return Driver(
+    name: json["name"] ?? json["user"]?["name"] ?? "",
+    phone: json["phone"] ?? json["user"]?["phone"] ?? "",
+    rating: json["rating"]?.toString() ?? "",
+  );
+}
 }
 
 class Pricing {
