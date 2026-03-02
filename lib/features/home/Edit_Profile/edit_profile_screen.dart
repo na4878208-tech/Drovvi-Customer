@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logisticscustomer/constants/bottom_show.dart';
+import 'package:logisticscustomer/features/home/Get_Profile/get_profile_screen.dart';
 import '../../../export.dart';
 import '../../../common_widgets/cuntom_textfield.dart';
 import '../../../common_widgets/custom_button.dart';
@@ -118,7 +119,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               context,
               MaterialPageRoute(
                 builder: (context) =>
-                    const TripsBottomNavBarScreen(initialIndex: 4),
+                    const GetProfileScreen(),
               ),
             );
           },

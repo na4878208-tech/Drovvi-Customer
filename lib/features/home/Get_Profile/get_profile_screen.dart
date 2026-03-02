@@ -13,6 +13,7 @@ import 'package:logisticscustomer/features/home/orders_flow/create_orders_screen
 import '../../../common_widgets/custom_text.dart';
 import '../../../constants/colors.dart';
 import '../../../constants/gps_location.dart';
+import '../../bottom_navbar/bottom_navbar_screen.dart';
 import '../orders_flow/create_orders_screens/pickup_location/pickup_controller.dart';
 import 'get_profile_controller.dart';
 
@@ -58,7 +59,16 @@ class _GetProfileScreenState extends ConsumerState<GetProfileScreen> {
         leading: RotatedBox(
           quarterTurns: 2,
           child: IconButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      const TripsBottomNavBarScreen(initialIndex: 4),
+                ),
+                (Route<dynamic> route) => false, // 👈 Ye missing tha
+              );
+            },
             icon: const Icon(
               Icons.arrow_forward_rounded,
               color: AppColors.pureWhite,

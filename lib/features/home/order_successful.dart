@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logisticscustomer/features/bottom_navbar/bottom_navbar_screen.dart';
-import 'package:logisticscustomer/features/home/orders_flow/ordr_tracking/order_tracking_screen.dart';
 import '../../constants/colors.dart';
 import 'package:lottie/lottie.dart';
 
@@ -179,18 +178,10 @@ class OrderSuccessful extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => OrderTrackingScreen(
-                                trackingCode: trackingCode,
-                              ),
+                              builder: (_) =>
+                                  TripsBottomNavBarScreen(initialIndex: 2),
                             ),
                           );
-                          // Navigator.pushReplacement(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) =>
-                          //         TripsBottomNavBarScreen(initialIndex: 1),
-                          //   ),
-                          // );
                         },
                         child: const Text(
                           "Track Order",

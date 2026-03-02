@@ -9,8 +9,8 @@ import 'package:logisticscustomer/features/home/orders_flow/all_orders/orders_co
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../export.dart';
+import '../../../bottom_navbar/bottom_navbar_screen.dart';
 import '../order details/order_details_screen.dart';
-import '../ordr_tracking/order_tracking_screen.dart';
 import 'pending_payment_method.dart';
 
 class Orders extends ConsumerStatefulWidget {
@@ -816,9 +816,7 @@ class _OrdersState extends ConsumerState<Orders> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => OrderTrackingScreen(
-                                  trackingCode: order.trackingCode ?? "",
-                                ),
+                                builder: (_) => TripsBottomNavBarScreen(initialIndex: 2)
                               ),
                             );
                           },

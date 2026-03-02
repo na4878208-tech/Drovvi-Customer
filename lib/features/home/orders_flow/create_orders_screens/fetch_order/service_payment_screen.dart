@@ -232,30 +232,30 @@ class _ServicePaymentScreenState extends ConsumerState<ServicePaymentScreen> {
     print("✅ Multi-stop data validation passed!");
   }
 
-  void _printDebugInfo() {
-    final cache = ref.read(orderCacheProvider);
-    final isMultiStop = cache["is_multi_stop_enabled"] == "true";
+  // void _printDebugInfo() {
+  //   final cache = ref.read(orderCacheProvider);
+  //   final isMultiStop = cache["is_multi_stop_enabled"] == "true";
 
-    print("🔍 DEBUG BEFORE RETRY:");
-    print("Multi-stop: $isMultiStop");
-    print("Service Type Selected: ${selectedServiceTypeId ?? 'NOT SELECTED'}");
-    print("Product Type ID: ${cache["selected_product_type_id"]}");
-    print("Packaging Type ID: ${cache["selected_packaging_type_id"]}");
+  //   print("🔍 DEBUG BEFORE RETRY:");
+  //   print("Multi-stop: $isMultiStop");
+  //   print("Service Type Selected: ${selectedServiceTypeId ?? 'NOT SELECTED'}");
+  //   print("Product Type ID: ${cache["selected_product_type_id"]}");
+  //   print("Packaging Type ID: ${cache["selected_packaging_type_id"]}");
 
-    if (isMultiStop) {
-      final stopsCount =
-          int.tryParse(cache["route_stops_count"]?.toString() ?? "0") ?? 0;
-      print("Stops Count: $stopsCount");
+  //   if (isMultiStop) {
+  //     final stopsCount =
+  //         int.tryParse(cache["route_stops_count"]?.toString() ?? "0") ?? 0;
+  //     print("Stops Count: $stopsCount");
 
-      for (int i = 1; i <= stopsCount; i++) {
-        print("\nStop $i:");
-        print("City: ${cache["stop_${i}_city"]}");
-        print("State: ${cache["stop_${i}_state"]}");
-        print("Quantity: ${cache["stop_${i}_quantity"]}");
-        print("Weight: ${cache["stop_${i}_weight"]}");
-      }
-    }
-  }
+  //     for (int i = 1; i <= stopsCount; i++) {
+  //       print("\nStop $i:");
+  //       print("City: ${cache["stop_${i}_city"]}");
+  //       print("State: ${cache["stop_${i}_state"]}");
+  //       print("Quantity: ${cache["stop_${i}_quantity"]}");
+  //       print("Weight: ${cache["stop_${i}_weight"]}");
+  //     }
+  //   }
+  // }
 
   Future<void> _getSmartQuotes() async {
     if (isLoadingQuotes) return;
