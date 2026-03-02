@@ -1023,7 +1023,6 @@ class DashboardAppBar extends ConsumerWidget implements PreferredSizeWidget {
           error: (_, __) => _loadingText(width: 110),
         ),
 
-        const SizedBox(height: 4),
 
         /// LOCATION
         profileState.when(

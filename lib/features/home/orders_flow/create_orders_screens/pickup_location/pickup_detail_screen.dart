@@ -1290,14 +1290,14 @@ class _Step1ScreenState extends ConsumerState<Step1Screen> {
     double totalWeight = itemWeight * quantity;
 
     String loadType = "Light Load";
-    Color loadColor = Colors.white;
+    Color loadColor = Colors.black;
 
     if (totalWeight >= 100) {
       loadType = "Heavy Load";
-      loadColor = Colors.white;
+      loadColor = Colors.redAccent;
     } else if (totalWeight >= 50) {
       loadType = "Medium Load";
-      loadColor = Colors.white;
+      loadColor = const Color.fromARGB(255, 228, 206, 9);
     }
 
     return Container(
@@ -1360,7 +1360,7 @@ class _Step1ScreenState extends ConsumerState<Step1Screen> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(

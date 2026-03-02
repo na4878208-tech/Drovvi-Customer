@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId = "com.yourcompany.logisticscustomer"
-        minSdk = flutter.minSdkVersion
+        minSdk = 28
         targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
