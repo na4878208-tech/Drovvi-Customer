@@ -816,7 +816,7 @@ class _OrdersState extends ConsumerState<Orders> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => TripsBottomNavBarScreen(initialIndex: 2)
+                                builder: (_) => TripsBottomNavBarScreen(initialIndex: 2, trackingCode: order.trackingCode,)
                               ),
                             );
                           },

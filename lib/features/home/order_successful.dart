@@ -179,7 +179,7 @@ class OrderSuccessful extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (_) =>
-                                  TripsBottomNavBarScreen(initialIndex: 2),
+                                  TripsBottomNavBarScreen(initialIndex: 2, trackingCode: trackingCode,),
                             ),
                           );
                         },
