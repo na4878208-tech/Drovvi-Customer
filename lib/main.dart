@@ -25,13 +25,6 @@ void main() async {
     ),
   );
 }
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   await Firebase.initializeApp();
-//   // runApp(const MyApp());
-//   runApp(ProviderScope(child: const MyApp()));
-// }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

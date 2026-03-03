@@ -62,26 +62,13 @@ class _OrdersState extends ConsumerState<Orders> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => PaymentOptionsModal(order: order, ref: ref),
+      builder: (modalContext) => PaymentOptionsModal(
+        order: order,
+        ref: ref,
+        parentContext: context, // ✅ ADD THIS
+      ),
     );
   }
-
-  // void _processPayment(AlOrder order) {
-  //   // Payment processing logic yahan implement karein
-  //   // Example: Payment gateway integration
-
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text("Processing payment for order ${order.orderNumber}"),
-  //       duration: const Duration(seconds: 2),
-  //     ),
-  //   );
-
-  //   // After payment, refresh orders list
-  //   Future.delayed(const Duration(seconds: 2), () {
-  //     ref.read(orderControllerProvider.notifier).refreshOrders();
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -134,28 +121,6 @@ class _OrdersState extends ConsumerState<Orders> {
     // 4️⃣ Orders list (with pagination / refresh)
     return _buildOrdersList(state);
   }
-
-  // Widget _buildContent(OrderState state) {
-  //   // Show loading only when first loading and no data
-
-  //   // Show error if any
-  //   if (state.error != null) {
-  //     // return _buildErrorState(state.error!);
-  //     return SessionExpiredScreen();
-  //   }
-
-  //   if (state.isLoading && state.orders.isEmpty) {
-  //     return _buildLoadingState();
-  //   }
-
-  //   // Show empty state if no orders
-  //   if (state.orders.isEmpty) {
-  //     return _buildEmptyState();
-  //   }
-
-  //   // Show orders list
-  //   return _buildOrdersList(state);
-  // }
 
   // Custom AppBar
   Widget _buildAppBar() {
@@ -615,18 +580,18 @@ class _OrdersState extends ConsumerState<Orders> {
   // Order Card
   Widget _buildOrderCard(AlOrder order) {
     String formattedDate = "—";
-    if (order.createdAt != null && order.createdAt!.isNotEmpty) {
+    if (order.createdAt.isNotEmpty) {
       try {
         formattedDate = DateFormat(
           'dd MMM yyyy • hh:mm a',
-        ).format(DateTime.parse(order.createdAt!));
+        ).format(DateTime.parse(order.createdAt));
       } catch (_) {}
     }
 
     final statusColor = _getStatusColor(order.status);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: AppColors.pureWhite,
         borderRadius: BorderRadius.circular(14),
@@ -659,19 +624,19 @@ class _OrdersState extends ConsumerState<Orders> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        order.orderNumber ?? "",
+                        order.orderNumber,
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
 
-                      if ((order.trackingCode ?? '').isNotEmpty) ...[
+                      if (order.trackingCode.isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Row(
                           children: [
                             Text(
-                              order.trackingCode!,
+                              order.trackingCode,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.electricTeal,
@@ -682,18 +647,12 @@ class _OrdersState extends ConsumerState<Orders> {
                             GestureDetector(
                               onTap: () {
                                 Clipboard.setData(
-                                  ClipboardData(text: order.trackingCode!),
+                                  ClipboardData(text: order.trackingCode),
                                 );
                                 AppSnackBar.showSuccess(
                                   context,
                                   "Tracking code copied",
                                 );
-                                // ScaffoldMessenger.of(context).showSnackBar(
-                                //   const SnackBar(
-                                //     content: Text("Tracking code copied"),
-                                //     duration: Duration(seconds: 1),
-                                //   ),
-                                // );
                               },
                               child: const Icon(Icons.copy, size: 12),
                             ),
@@ -708,8 +667,9 @@ class _OrdersState extends ConsumerState<Orders> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    _statusChip(order.statusText, statusColor),
-                    if (order.isMultiStop == 1) ...[
+                    _statusChip(order.status, statusColor),
+
+                    if (order.isMultiStop) ...[
                       const SizedBox(height: 6),
                       _miniChip("${order.stopsCount} Stops"),
                     ],
@@ -724,33 +684,17 @@ class _OrdersState extends ConsumerState<Orders> {
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
             child: Column(
               children: [
-                /// ROUTE
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.electricTeal.withOpacity(0.04),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: order.isMultiStop == 1 && order.stops.isNotEmpty
-                      ? _multiStopTimeline(order.stops)
-                      : _singleTimeline(order),
-                ),
-
-                const SizedBox(height: 14),
-
-                /// META
+                /// META ROW
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (order.vehicle.vehicleType.isNotEmpty)
-                      _iconText(
-                        Icons.local_shipping,
-                        order.vehicle.vehicleType,
-                      ),
-                    if (order.driver.name.isNotEmpty)
-                      _iconText(Icons.person_outline, order.driver.name),
-                    if (order.totalWeightKg != null &&
-                        order.totalWeightKg!.isNotEmpty)
+                    if (order.vehicle.type.isNotEmpty)
+                      _iconText(Icons.local_shipping, order.vehicle.type),
+
+                    if (order.productType.name.isNotEmpty)
+                      _iconText(Icons.person_outline, order.productType.name),
+
+                    if (order.totalWeightKg.isNotEmpty)
                       _iconText(
                         Icons.scale_outlined,
                         "${order.totalWeightKg} kg",
@@ -765,7 +709,7 @@ class _OrdersState extends ConsumerState<Orders> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "R ${order.finalCost ?? '--'}",
+                      "R ${order.finalCost}",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -786,20 +730,17 @@ class _OrdersState extends ConsumerState<Orders> {
           ),
 
           /// ================= FOOTER =================
-          /// ================= FOOTER =================
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-            child: order.paymetstatus?.toLowerCase() == 'pending'
+            child: order.paymentStatus.toLowerCase() == 'pending'
                 ? ElevatedButton.icon(
                     onPressed: () {
-                      // Payment karne ka logic yahan implement karein
                       _handlePayment(order);
                     },
                     icon: const Icon(Icons.payment, size: 16),
                     label: const Text("Pay Now"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Colors.orange, // Pending payment ke liye orange color
+                      backgroundColor: Colors.orange,
                       foregroundColor: AppColors.pureWhite,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
@@ -816,7 +757,10 @@ class _OrdersState extends ConsumerState<Orders> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => TripsBottomNavBarScreen(initialIndex: 2, trackingCode: order.trackingCode,)
+                                builder: (_) => TripsBottomNavBarScreen(
+                                  initialIndex: 2,
+                                  trackingCode: order.trackingCode,
+                                ),
                               ),
                             );
                           },
@@ -840,7 +784,7 @@ class _OrdersState extends ConsumerState<Orders> {
                               context,
                               MaterialPageRoute(
                                 builder: (_) =>
-                                    OrderDetailsScreen(orderId: order.id ?? 0),
+                                    OrderDetailsScreen(orderId: order.id),
                               ),
                             );
                           },
@@ -865,121 +809,65 @@ class _OrdersState extends ConsumerState<Orders> {
                     ],
                   ),
           ),
-
-          // Padding(
-          //   padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-          //   child: Row(
-          //     children: [
-          //       Expanded(
-          //         child: OutlinedButton.icon(
-          //           onPressed: () {
-          //             Navigator.push(
-          //               context,
-          //               MaterialPageRoute(
-          //                 builder: (_) => OrderTrackingScreen(
-          //                   trackingCode: order.trackingCode ?? "",
-          //                 ),
-          //               ),
-          //             );
-          //           },
-          //           icon: const Icon(Icons.map_outlined, size: 16),
-          //           label: const Text("Track"),
-          //           style: OutlinedButton.styleFrom(
-          //             foregroundColor: AppColors.electricTeal,
-          //             side: BorderSide(color: AppColors.electricTeal),
-          //             shape: RoundedRectangleBorder(
-          //               borderRadius: BorderRadius.circular(18),
-          //             ),
-          //             padding: const EdgeInsets.symmetric(vertical: 10),
-          //           ),
-          //         ),
-          //       ),
-          //       const SizedBox(width: 12),
-          //       Expanded(
-          //         child: ElevatedButton.icon(
-          //           onPressed: () {
-          //             Navigator.push(
-          //               context,
-          //               MaterialPageRoute(
-          //                 builder: (_) =>
-          //                     OrderDetailsScreen(orderId: order.id ?? 0),
-          //               ),
-          //             );
-          //           },
-          //           icon: const Icon(Icons.remove_red_eye_outlined, size: 16,color: AppColors.pureWhite,),
-          //           label: const Text("Details",style: TextStyle(color: AppColors.pureWhite,),),
-          //           style: ElevatedButton.styleFrom(
-          //             backgroundColor: AppColors.electricTeal,
-          //             shape: RoundedRectangleBorder(
-          //               borderRadius: BorderRadius.circular(18),
-          //             ),
-          //             padding: const EdgeInsets.symmetric(vertical: 10),
-          //           ),
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
         ],
       ),
     );
   }
+  // Widget _singleTimeline(AlOrder order) {
+  //   return Column(
+  //     children: [
+  //       _timelineItem(
+  //         title: "Pickup",
+  //         value: order.pickupCity ?? "",
+  //         icon: Icons.upload,
+  //         color: AppColors.electricTeal,
+  //         isLast: false,
+  //       ),
+  //       _timelineItem(
+  //         title: "Delivery",
+  //         value: order.deliveryCity ?? "",
+  //         icon: Icons.download,
+  //         color: AppColors.limeGreen,
+  //         isLast: true,
+  //       ),
+  //     ],
+  //   );
+  // }
 
-  Widget _singleTimeline(AlOrder order) {
-    return Column(
-      children: [
-        _timelineItem(
-          title: "Pickup",
-          value: order.pickupCity ?? "",
-          icon: Icons.upload,
-          color: AppColors.electricTeal,
-          isLast: false,
-        ),
-        _timelineItem(
-          title: "Delivery",
-          value: order.deliveryCity ?? "",
-          icon: Icons.download,
-          color: AppColors.limeGreen,
-          isLast: true,
-        ),
-      ],
-    );
-  }
+  // Widget _multiStopTimeline(List<OrderStop> stops) {
+  //   return Column(
+  //     children: List.generate(stops.length, (i) {
+  //       final stop = stops[i];
+  //       final isLast = i == stops.length - 1;
 
-  Widget _multiStopTimeline(List<OrderStop> stops) {
-    return Column(
-      children: List.generate(stops.length, (i) {
-        final stop = stops[i];
-        final isLast = i == stops.length - 1;
+  //       Color color;
+  //       IconData icon;
 
-        Color color;
-        IconData icon;
+  //       switch (stop.type) {
+  //         case 'pickup':
+  //           color = AppColors.electricTeal;
+  //           icon = Icons.upload;
+  //           break;
+  //         case 'drop_off':
+  //           color = Colors.red;
+  //           icon = Icons.download;
+  //           break;
+  //         default:
+  //           color = Colors.orange;
+  //           icon = Icons.location_on;
+  //       }
 
-        switch (stop.type) {
-          case 'pickup':
-            color = AppColors.electricTeal;
-            icon = Icons.upload;
-            break;
-          case 'drop_off':
-            color = Colors.red;
-            icon = Icons.download;
-            break;
-          default:
-            color = Colors.orange;
-            icon = Icons.location_on;
-        }
-
-        return _timelineItem(
-          title: stop.type.replaceAll('_', ' ').toUpperCase(),
-          value: stop.city,
-          subtitle: stop.address,
-          icon: icon,
-          color: color,
-          isLast: isLast,
-        );
-      }),
-    );
-  }
+  //       return _timelineItem(
+  //         title: stop.type.replaceAll('_', ' ').toUpperCase(),
+  //         value: stop.city,
+  //         subtitle: stop.address,
+  //         icon: icon,
+  //         color: color,
+  //         isLast: isLast,
+  //       );
+  //     }),
+  //   );
+  // }
 
   Widget _statusChip(String text, Color color) {
     return Container(
@@ -1017,69 +905,69 @@ class _OrdersState extends ConsumerState<Orders> {
     );
   }
 
-  Widget _timelineItem({
-    required String title,
-    required String value,
-    String? subtitle,
-    required IconData icon,
-    required Color color,
-    required bool isLast,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Column(
-          children: [
-            Container(
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 12, color: color),
-            ),
-            if (!isLast)
-              Container(width: 2, height: 26, color: color.withOpacity(0.25)),
-          ],
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: color,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (subtitle != null && subtitle.isNotEmpty)
-                  Text(
-                    subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _timelineItem({
+  //   required String title,
+  //   required String value,
+  //   String? subtitle,
+  //   required IconData icon,
+  //   required Color color,
+  //   required bool isLast,
+  // }) {
+  //   return Row(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Column(
+  //         children: [
+  //           Container(
+  //             width: 22,
+  //             height: 22,
+  //             decoration: BoxDecoration(
+  //               color: color.withOpacity(0.15),
+  //               shape: BoxShape.circle,
+  //             ),
+  //             child: Icon(icon, size: 12, color: color),
+  //           ),
+  //           if (!isLast)
+  //             Container(width: 2, height: 26, color: color.withOpacity(0.25)),
+  //         ],
+  //       ),
+  //       const SizedBox(width: 12),
+  //       Expanded(
+  //         child: Padding(
+  //           padding: const EdgeInsets.only(bottom: 12),
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Text(
+  //                 title,
+  //                 style: TextStyle(
+  //                   fontSize: 11,
+  //                   fontWeight: FontWeight.w600,
+  //                   color: color,
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 2),
+  //               Text(
+  //                 value,
+  //                 style: const TextStyle(
+  //                   fontSize: 14,
+  //                   fontWeight: FontWeight.w600,
+  //                 ),
+  //               ),
+  //               if (subtitle != null && subtitle.isNotEmpty)
+  //                 Text(
+  //                   subtitle,
+  //                   maxLines: 2,
+  //                   overflow: TextOverflow.ellipsis,
+  //                   style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+  //                 ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _iconText(IconData icon, String text) {
     return Row(
@@ -1096,7 +984,14 @@ class _OrdersState extends ConsumerState<Orders> {
     if (_selectedFilter == 'All') {
       return orders;
     } else if (_selectedFilter == 'Active') {
-      return orders.where((order) => order.isActive).toList();
+      return orders
+          .where(
+            (order) =>
+                order.status.toLowerCase() == 'assigned' ||
+                order.status.toLowerCase() == 'confirmed' ||
+                order.status.toLowerCase() == 'in_transit',
+          )
+          .toList();
     } else {
       return orders
           .where(

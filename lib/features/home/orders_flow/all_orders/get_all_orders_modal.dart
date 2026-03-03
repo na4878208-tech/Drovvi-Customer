@@ -1,72 +1,155 @@
-// lib/features/orders/models/get_all_orders_modal.dart
+// lib/features/orders/models/get_all_orders_model.dart
 
 String parseString(dynamic value) {
   if (value == null) return '';
   if (value is String) return value;
   if (value is num) return value.toString();
-  if (value is Map) return value['name']?.toString() ?? '';
   return value.toString();
+}
+
+bool parseBoolFromInt(dynamic value) {
+  if (value == 1) return true;
+  if (value == 0) return false;
+  return false;
 }
 
 class GetOrderResponse {
   final bool success;
-  final String message;
-  final AllOrderData data;
-  final AlMeta meta;
+  final List<AlOrder> data;
+  final AlMeta pagination;
 
   GetOrderResponse({
     required this.success,
-    required this.message,
     required this.data,
-    required this.meta,
+    required this.pagination,
   });
 
   factory GetOrderResponse.fromJson(Map<String, dynamic> json) {
     return GetOrderResponse(
       success: json['success'] ?? false,
-      message: json['message'] ?? '',
-      data: AllOrderData.fromJsonList(json['data'] ?? []),
-      meta: AlMeta.fromJson(json['pagination'] ?? {}),
+      data: (json['data'] as List? ?? [])
+          .map((e) => AlOrder.fromJson(e))
+          .toList(),
+      pagination: AlMeta.fromJson(json['pagination'] ?? {}),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'success': success,
-      'message': message,
-      'data': data.toJson(),
-      'meta': meta.toJson(),
-    };
   }
 }
 
-class AllOrderData {
-  final List<AlOrder> orders;
+class AlOrder {
+  final int id;
+  final String orderNumber;
+  final String trackingCode;
+  final String status;
+  final String paymentStatus;
+  final String paymentMethod;
 
-  AllOrderData({required this.orders});
+  final bool isMultiStop;
+  final int stopsCount;
+  final List<OrderStop> stops;
 
-  factory AllOrderData.fromJsonList(List list) {
-    return AllOrderData(orders: list.map((e) => AlOrder.fromJson(e)).toList());
-  }
-  Map<String, dynamic> toJson() {
-    return {'orders': orders.map((e) => e.toJson()).toList()};
+  final ProductType productType;
+  final PackagingType packagingType;
+
+  final String totalWeightKg;
+  final int itemQuantity;
+  final String distanceKm;
+  final String finalCost;
+  final String estimatedCost;
+  final String serviceFee;
+  final String taxAmount;
+
+  final String pickupAddress;
+  final String pickupCity;
+  final String deliveryAddress;
+  final String deliveryCity;
+
+  final AlVehicle vehicle;
+  final AlDriver? driver;
+
+  final String createdAt;
+
+  AlOrder({
+    required this.id,
+    required this.orderNumber,
+    required this.trackingCode,
+    required this.status,
+    required this.paymentStatus,
+    required this.paymentMethod,
+    required this.isMultiStop,
+    required this.stopsCount,
+    required this.stops,
+    required this.productType,
+    required this.packagingType,
+    required this.totalWeightKg,
+    required this.itemQuantity,
+    required this.distanceKm,
+    required this.finalCost,
+    required this.estimatedCost,
+    required this.serviceFee,
+    required this.taxAmount,
+    required this.pickupAddress,
+    required this.pickupCity,
+    required this.deliveryAddress,
+    required this.deliveryCity,
+    required this.vehicle,
+    required this.driver,
+    required this.createdAt,
+  });
+
+  factory AlOrder.fromJson(Map<String, dynamic> json) {
+    return AlOrder(
+      id: json['id'] ?? 0,
+      orderNumber: json['order_number'] ?? '',
+      trackingCode: json['tracking_code'] ?? '',
+      status: json['status'] ?? '',
+      paymentStatus: json['payment_status'] ?? '',
+      paymentMethod: json['payment_method'] ?? '',
+
+      isMultiStop: parseBoolFromInt(json['is_multi_stop']),
+      stopsCount: json['stops_count'] ?? 0,
+
+      stops: (json['stops'] as List? ?? [])
+          .map((e) => OrderStop.fromJson(e))
+          .toList(),
+
+      productType: ProductType.fromJson(json['product_type'] ?? {}),
+      packagingType: PackagingType.fromJson(json['packaging_type'] ?? {}),
+
+      totalWeightKg: parseString(json['total_weight_kg']),
+      itemQuantity: json['item_quantity'] ?? 0,
+      distanceKm: parseString(json['distance_km']),
+      finalCost: parseString(json['final_cost']),
+      estimatedCost: parseString(json['estimated_cost']),
+      serviceFee: parseString(json['service_fee']),
+      taxAmount: parseString(json['tax_amount']),
+
+      pickupAddress: json['pickup_address'] ?? '',
+      pickupCity: json['pickup_city'] ?? '',
+      deliveryAddress: json['delivery_address'] ?? '',
+      deliveryCity: json['delivery_city'] ?? '',
+
+      vehicle: AlVehicle.fromJson(json['vehicle'] ?? {}),
+      driver: json['driver'] != null ? AlDriver.fromJson(json['driver']) : null,
+
+      createdAt: json['created_at'] ?? '',
+    );
   }
 }
 
 class OrderStop {
-  final int sequence;
-  final String type;
+  final int sequenceNumber;
+  final String stopType;
   final String address;
   final String city;
   final String contactName;
   final String contactPhone;
-  final int quantity;
-  final String weightKg;
+  final int? quantity;
+  final String? weightKg;
   final String status;
 
   OrderStop({
-    required this.sequence,
-    required this.type,
+    required this.sequenceNumber,
+    required this.stopType,
     required this.address,
     required this.city,
     required this.contactName,
@@ -78,195 +161,85 @@ class OrderStop {
 
   factory OrderStop.fromJson(Map<String, dynamic> json) {
     return OrderStop(
-      sequence: json['sequence_number'] ?? 0,
-      type: json['stop_type'] ?? '',
+      sequenceNumber: json['sequence_number'] ?? 0,
+      stopType: json['stop_type'] ?? '',
       address: json['address'] ?? '',
       city: json['city'] ?? '',
       contactName: json['contact_name'] ?? '',
       contactPhone: json['contact_phone'] ?? '',
-      quantity: json['quantity'] ?? 0,
-      weightKg: json['weight_kg'] ?? '',
+      quantity: json['quantity'],
+      weightKg: parseString(json['weight_kg']),
       status: json['status'] ?? '',
     );
   }
 }
 
-class AlOrder {
-  final int? id;
-  final String? orderNumber;
-  final String? trackingCode;
-  final String? paymetstatus;
-  final int stopsCount;
-  final List<OrderStop> stops;
-  final String status;
-  final int? isMultiStop;
-  final String? productType;
-  final String? packagingType;
-  final String? totalWeightKg;
-  final String? pickupCity;
-  final String? deliveryCity;
-  final String? distanceKm;
-  final String? finalCost;
-  final int? matchingScore;
-  final AlVehicle vehicle;
-  final AlDriver driver;
-  final String? createdAt;
+class ProductType {
+  final int id;
+  final String name;
+  final String category;
 
-  AlOrder({
-    required this.id,
-    required this.orderNumber,
-    required this.trackingCode,
-    required this.paymetstatus,
-    required this.status,
-    required this.isMultiStop,
-    required this.stopsCount,
-    required this.stops,
-    this.productType,
-    this.packagingType,
-    this.totalWeightKg,
-    required this.pickupCity,
-    required this.deliveryCity,
-    this.distanceKm,
-    this.finalCost,
-    this.matchingScore,
-    required this.vehicle,
-    required this.driver,
-    required this.createdAt,
-  });
+  ProductType({required this.id, required this.name, required this.category});
 
-  factory AlOrder.fromJson(Map<String, dynamic> json) {
-    return AlOrder(
-      id: json['id'],
-      orderNumber: json['order_number'] ?? '',
-      trackingCode: json['tracking_code'],
-      status: json['status'] ?? '',
-      paymetstatus: json['payment_status'] ?? '',
-      isMultiStop: json['is_multi_stop'] ?? 0,
-      stopsCount: json['stops_count'] ?? 0,
-
-      stops: (json['stops'] as List? ?? [])
-          .map((e) => OrderStop.fromJson(e))
-          .toList(),
-
-      productType: parseString(json['product_type']),
-      packagingType: parseString(json['packaging_type']),
-      totalWeightKg: json['total_weight_kg'],
-      pickupCity: json['pickup_city'] ?? '',
-      deliveryCity: json['delivery_city'] ?? '',
-      distanceKm: parseString(json['distance_km']),
-      finalCost: parseString(json['final_cost']),
-      matchingScore: json['matching_score'],
-
-      vehicle: AlVehicle.fromJson(json['vehicle'] ?? {}),
-      driver: json['driver'] != null
-          ? AlDriver.fromJson(json['driver'])
-          : AlDriver.empty(),
-
-      createdAt: json['created_at'],
+  factory ProductType.fromJson(Map<String, dynamic> json) {
+    return ProductType(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      category: json['category'] ?? '',
     );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'order_number': orderNumber,
-      'tracking_code': trackingCode,
-      'status': status,
-      'is_multi_stop': isMultiStop,
-      'product_type': productType,
-      'packaging_type': packagingType,
-      'total_weight_kg': totalWeightKg,
-      'pickup_city': pickupCity,
-      'delivery_city': deliveryCity,
-      'distance_km': distanceKm,
-      'final_cost': finalCost,
-      'matching_score': matchingScore,
-      'vehicle': vehicle.toJson(),
-      'driver': driver.toJson(),
-      'created_at': createdAt,
-    };
+class PackagingType {
+  final int id;
+  final String name;
+
+  PackagingType({required this.id, required this.name});
+
+  factory PackagingType.fromJson(Map<String, dynamic> json) {
+    return PackagingType(id: json['id'] ?? 0, name: json['name'] ?? '');
   }
-
-  // Helper method for status color
-  String get statusColor {
-    switch (status) {
-      case 'completed':
-        return 'green';
-      case 'assigned':
-        return 'blue';
-      case 'pending':
-        return 'orange';
-      case 'in_transit':
-        return 'purple';
-      default:
-        return 'gray';
-    }
-  }
-
-  // Helper method for status text
-  String get statusText {
-    switch (status) {
-      case 'completed':
-        return 'Completed';
-      case 'assigned':
-        return 'Assigned';
-      case 'pending':
-        return 'Pending';
-      case 'in_transit':
-        return 'In Transit';
-      default:
-        return status;
-    }
-  }
-
-  // Check if order is active
-  bool get isActive => status != 'completed';
 }
 
 class AlVehicle {
+  final int id;
   final String registrationNumber;
-  final String vehicleType;
+  final String make;
+  final String model;
+  final String type;
 
-  AlVehicle({required this.registrationNumber, required this.vehicleType});
+  AlVehicle({
+    required this.id,
+    required this.registrationNumber,
+    required this.make,
+    required this.model,
+    required this.type,
+  });
 
   factory AlVehicle.fromJson(Map<String, dynamic> json) {
     return AlVehicle(
+      id: json['id'] ?? 0,
       registrationNumber: json['registration_number'] ?? '',
-      vehicleType: json['vehicle_type'] ?? '',
+      make: json['make'] ?? '',
+      model: json['model'] ?? '',
+      type: json['type'] ?? '',
     );
-  }
-
-  factory AlVehicle.empty() {
-    return AlVehicle(registrationNumber: '', vehicleType: '');
-  }
-  Map<String, dynamic> toJson() {
-    return {
-      'registration_number': registrationNumber,
-      'vehicle_type': vehicleType,
-    };
   }
 }
 
 class AlDriver {
+  final int id;
   final String name;
   final String phone;
-  final String rating;
 
-  AlDriver({required this.name, required this.phone, required this.rating});
+  AlDriver({required this.id, required this.name, required this.phone});
 
   factory AlDriver.fromJson(Map<String, dynamic> json) {
     return AlDriver(
-      name: json['user']?['name'] ?? '',
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
       phone: json['phone'] ?? '',
-      rating: json['rating'] ?? '',
     );
-  }
-
-  factory AlDriver.empty() {
-    return AlDriver(name: '', phone: '', rating: '');
-  }
-  Map<String, dynamic> toJson() {
-    return {'name': name, 'phone': phone, 'rating': rating};
   }
 }
 
@@ -276,8 +249,7 @@ class AlMeta {
   final int perPage;
   final int total;
 
-  const AlMeta({
-    // <-- 'const' keyword add karein
+  const AlMeta({ 
     required this.currentPage,
     required this.lastPage,
     required this.perPage,
@@ -286,19 +258,10 @@ class AlMeta {
 
   factory AlMeta.fromJson(Map<String, dynamic> json) {
     return AlMeta(
-      currentPage: json['current_page'] as int,
-      lastPage: json['last_page'] as int,
-      perPage: json['per_page'] as int,
-      total: json['total'] as int,
+      currentPage: json['current_page'] ?? 1,
+      lastPage: json['last_page'] ?? 1,
+      perPage: json['per_page'] ?? 10,
+      total: json['total'] ?? 0,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'current_page': currentPage,
-      'last_page': lastPage,
-      'per_page': perPage,
-      'total': total,
-    };
   }
 }

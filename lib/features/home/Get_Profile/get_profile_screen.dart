@@ -60,13 +60,12 @@ class _GetProfileScreenState extends ConsumerState<GetProfileScreen> {
           quarterTurns: 2,
           child: IconButton(
             onPressed: () {
-              Navigator.pushAndRemoveUntil(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      const TripsBottomNavBarScreen(initialIndex: 4),
+                      const TripsBottomNavBarScreen(initialIndex: 3),
                 ),
-                (Route<dynamic> route) => false, // 👈 Ye missing tha
               );
             },
             icon: const Icon(
@@ -303,222 +302,6 @@ class _GetProfileScreenState extends ConsumerState<GetProfileScreen> {
     );
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   final profileState = ref.watch(getProfileControllerProvider);
-
-  //   return profileState.when(
-  //     loading: () => const Center(child: CircularProgressIndicator()),
-
-  //     // error: (err, _) => Center(child: Text(err.toString())),
-  //     error: (e, st) {
-  //       // if (e.toString().contains("SESSION_EXPIRED")) {
-  //       return SessionExpiredScreen();
-  //       // }
-  //       // return Scaffold(body: Center(child: Text("Error: $e")));
-  //     },
-
-  //     data: (profile) {
-  //       if (profile == null) {
-  //         return const Center(child: Text("No Profile Data"));
-  //       }
-
-  //       final user = profile.data.user;
-
-  //       final Color blueColor = AppColors.electricTeal;
-  //       // Screen height ka hisaab lagana zaroori hai is layout ke liye
-  //       double screenHeight = MediaQuery.of(context).size.height;
-
-  //       return Scaffold(
-  //         backgroundColor: AppColors.lightGrayBackground,
-  //         appBar: AppBar(
-  //           automaticallyImplyLeading: false,
-
-  //     leading: RotatedBox(
-  //         quarterTurns: 2,
-  //         child: IconButton(
-  //           onPressed: () => Navigator.pop(context),
-  //           icon: Icon(Icons.arrow_forward_rounded, color: AppColors.pureWhite),
-  //         ),
-  //       ),
-
-  //           title: const Text(
-  //             'Profile',
-  //             style: TextStyle(
-  //               color: AppColors.pureWhite,
-  //               fontWeight: FontWeight.bold,
-  //             ),
-  //           ),
-  //           centerTitle: true,
-  //           backgroundColor: blueColor,
-  //           elevation: 0,
-  //           actions: [
-  //             Padding(
-  //               padding: const EdgeInsets.only(right: 15.0),
-  //               child: GestureDetector(
-  //                 onTap: () {
-  //                   showDialog(
-  //                     context: context,
-  //                     barrierDismissible: true,
-  //                     builder: (context) {
-  //                       return AlertDialog(
-  //                         shape: RoundedRectangleBorder(
-  //                           borderRadius: BorderRadius.circular(16),
-  //                         ),
-  //                         title: const Text(
-  //                           "Logout",
-  //                           style: TextStyle(
-  //                             fontWeight: FontWeight.bold,
-  //                             fontSize: 20,
-  //                           ),
-  //                         ),
-  //                         content: const Text(
-  //                           "Are you sure you want to logout?",
-  //                           style: TextStyle(
-  //                             fontSize: 15,
-  //                             color: Colors.black87,
-  //                           ),
-  //                         ),
-  //                         actions: [
-  //                           /// CANCEL BUTTON (bordered)
-  //                           TextButton(
-  //                             onPressed: () => Navigator.pop(context),
-  //                             style: TextButton.styleFrom(
-  //                               side: const BorderSide(
-  //                                 color: AppColors.electricTeal,
-  //                                 width: 1,
-  //                               ),
-  //                               shape: RoundedRectangleBorder(
-  //                                 borderRadius: BorderRadius.circular(8),
-  //                               ),
-  //                               padding: const EdgeInsets.symmetric(
-  //                                 horizontal: 18,
-  //                                 vertical: 9,
-  //                               ),
-  //                             ),
-  //                             child: const Text(
-  //                               "Cancel",
-  //                               style: TextStyle(
-  //                                 color: AppColors.electricTeal,
-  //                                 fontSize: 16,
-  //                                 fontWeight: FontWeight.w500,
-  //                               ),
-  //                             ),
-  //                           ),
-
-  //                           /// LOGOUT BUTTON (actual API call)
-  //                           ElevatedButton(
-  //                             style: ElevatedButton.styleFrom(
-  //                               backgroundColor: blueColor,
-  //                               shape: RoundedRectangleBorder(
-  //                                 borderRadius: BorderRadius.circular(8),
-  //                               ),
-  //                             ),
-  //                             onPressed: () async {
-  //                               final msg = await ref
-  //                                   .read(logoutControllerProvider.notifier)
-  //                                   .logoutUser();
-
-  //                               if (msg != null) {
-  //                                 await LocalStorage.clearToken();
-
-  //                                 // Close dialog
-  //                                 Navigator.of(
-  //                                   // ignore: use_build_context_synchronously
-  //                                   context,
-  //                                   rootNavigator: true,
-  //                                 ).pop();
-
-  //                                 // Navigate to Login
-  //                                 Navigator.of(
-  //                                   // ignore: use_build_context_synchronously
-  //                                   context,
-  //                                   rootNavigator: true,
-  //                                 ).pushAndRemoveUntil(
-  //                                   MaterialPageRoute(builder: (_) => Login()),
-  //                                   (route) => false,
-  //                                 );
-
-  //                                 // Show logout message
-  //                                 ScaffoldMessenger.of(
-  //                                   context,
-  //                                 ).showSnackBar(SnackBar(content: Text(msg)));
-  //                               }
-  //                             },
-  //                             child: const Text(
-  //                               "Logout",
-  //                               style: TextStyle(
-  //                                 color: Colors.white,
-  //                                 fontSize: 16,
-  //                               ),
-  //                             ),
-  //                           ),
-  //                         ],
-  //                       );
-  //                     },
-  //                   );
-  //                 },
-  //                 child: const Icon(
-  //                   Icons.logout,
-  //                   color: AppColors.pureWhite,
-  //                   size: 28,
-  //                 ),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-
-  //         body: Column(
-  //           children: [
-  //             Expanded(
-  //               child: Stack(
-  //                 children: [
-  //                   Container(height: 150, color: blueColor),
-
-  //                   Positioned(
-  //                     top: screenHeight * 0.1,
-  //                     left: 20,
-  //                     right: 20,
-  //                     bottom: 25,
-  //                     child: _buildInfoCard(),
-  //                   ),
-
-  //                   Positioned(
-  //                     top: 10,
-  //                     left: 0,
-  //                     right: 0,
-  //                     child: Column(
-  //                       children: [
-  //                         _buildProfileImage(AppColors.electricTeal),
-  //                         const SizedBox(height: 15),
-  //                         Text(
-  //                           user.name.isNotEmpty ? user.name : "N/A",
-  //                           style: const TextStyle(
-  //                             color: AppColors.darkText,
-  //                             fontSize: 24,
-  //                             fontWeight: FontWeight.w600,
-  //                           ),
-  //                         ),
-
-  //                         Container(
-  //                           width: 300,
-  //                           margin: const EdgeInsets.only(top: 8),
-  //                           height: 1,
-  //                           color: AppColors.electricTeal,
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   // --- Profile Image Widget ---
   Widget _buildProfileImage(Color primaryBlue) {
     final profileState = ref.watch(getProfileControllerProvider);
@@ -654,11 +437,6 @@ class _GetProfileScreenState extends ConsumerState<GetProfileScreen> {
             showVerification: false,
           ),
 
-          // _buildInfoRow(
-          //   label: 'Date Of Birth',
-          //   value: customer.dateOfBirth ?? "N/A",
-          //   showVerification: false,
-          // ),
           const SizedBox(height: 10),
 
           // ✅ Phone

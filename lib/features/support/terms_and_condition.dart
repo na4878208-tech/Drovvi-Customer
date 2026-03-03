@@ -1,93 +1,73 @@
 import 'package:flutter/material.dart';
-import 'package:logisticscustomer/constants/colors.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import '../../../../common_widgets/custom_text.dart';
+import '../../../../constants/colors.dart';
 
-class TermsPrivacyScreen extends StatelessWidget {
+class TermsConditionWebViewScreen extends StatefulWidget {
   final String title;
-  final String content;
+  final String url;
 
-  const TermsPrivacyScreen({
+  const TermsConditionWebViewScreen({
     super.key,
     required this.title,
-    required this.content,
+    required this.url,
   });
+
+  @override
+  State<TermsConditionWebViewScreen> createState() =>
+      _TermsConditionWebViewScreenState();
+}
+
+class _TermsConditionWebViewScreenState extends State<TermsConditionWebViewScreen> {
+  late final WebViewController _controller;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (url) {
+            setState(() {
+              isLoading = false;
+            });
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(widget.url));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightGrayBackground,
+      backgroundColor: Colors.white, // White background while loading
       appBar: AppBar(
-        backgroundColor: AppColors.electricTeal,
-        title: Text(
-          title,
-          style: TextStyle(
-            color: AppColors.pureWhite,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        foregroundColor: Colors.white,
+        title: CustomText(txt: widget.title, fontSize: 18, color: Colors.white),
         centerTitle: true,
-        leading: RotatedBox(
-          quarterTurns: 2,
-          child: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(
-              Icons.arrow_forward_rounded,
-              color: AppColors.pureWhite,
-            ),
-          ),
+        elevation: 0,
+        backgroundColor: AppColors.electricTeal,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_outlined, size: 20),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (isLoading)
+            Container(
+              color: Colors.white,
+              child: const Center(
+                child: CircularProgressIndicator(
                   color: AppColors.electricTeal,
                 ),
               ),
-              const SizedBox(height: 15),
-              Text(
-                content,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Colors.black87,
-                  height: 1.5, // line height for readability
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Center(
-              //   child: ElevatedButton(
-              //     onPressed: () => Navigator.pop(context),
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: AppColors.electricTeal,
-              //       padding: const EdgeInsets.symmetric(
-              //         horizontal: 50,
-              //         vertical: 15,
-              //       ),
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(12),
-              //       ),
-              //     ),
-              //     child: const Text(
-              //       "Close",
-              //       style: TextStyle(
-              //         color: Colors.white,
-              //         fontWeight: FontWeight.bold,
-              //         fontSize: 16,
-              //       ),
-              //     ),
-              //   ),
-              // ),
-            ],
-          ),
-        ),
+            ),
+        ],
       ),
     );
   }

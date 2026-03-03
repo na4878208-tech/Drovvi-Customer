@@ -1,23 +1,28 @@
 // lib/features/orders/controllers/order_controller.dart
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logisticscustomer/features/home/orders_flow/all_orders/get_all_orders_modal.dart';
 import 'package:logisticscustomer/features/home/orders_flow/all_orders/orders_repo.dart';
 
-
 class OrderController extends StateNotifier<OrderState> {
   final OrderRepository repository;
+
   OrderController(this.repository) : super(OrderState());
 
-  // Load initial orders
+  /// ================= LOAD INITIAL =================
   Future<void> loadOrders() async {
     try {
       state = state.copyWith(isLoading: true, error: null);
+
       final response = await repository.getAllOrders();
+
       state = state.copyWith(
-        orders: response.data.orders,
+        orders: response.data,
+        meta: response.pagination,
         isLoading: false,
-        meta: response.meta,
         currentPage: 1,
+        currentFilter: 'All',
+        error: null,
       );
     } catch (e) {
       state = state.copyWith(
@@ -27,44 +32,60 @@ class OrderController extends StateNotifier<OrderState> {
     }
   }
 
-  // Load more orders (pagination)
+  /// ================= LOAD MORE (PAGINATION) =================
   Future<void> loadMoreOrders() async {
+    if (state.isLoadingMore) return;
+    if (state.currentPage >= state.meta.lastPage) return;
+
     try {
-      // Check if we have more pages
-      if (state.isLoadingMore || state.currentPage >= state.meta.lastPage) {
+      state = state.copyWith(isLoadingMore: true);
+
+      final nextPage = state.currentPage + 1;
+
+      final response = state.currentFilter == 'All'
+          ? await repository.getAllOrders(page: nextPage)
+          : await repository.getOrdersByStatus(
+              state.currentFilter,
+              page: nextPage,
+            );
+
+      state = state.copyWith(
+        orders: [...state.orders, ...response.data],
+        meta: response.pagination,
+        currentPage: nextPage,
+        isLoadingMore: false,
+        error: null,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoadingMore: false,
+        error: e.toString(),
+      );
+    }
+  }
+
+  /// ================= FILTER =================
+  Future<void> filterByStatus(String status) async {
+    try {
+      state = state.copyWith(
+        isLoading: true,
+        error: null,
+        currentFilter: status,
+      );
+
+      if (status == 'All') {
+        await loadOrders();
         return;
       }
 
-      state = state.copyWith(isLoadingMore: true);
-      
-      final nextPage = state.currentPage + 1;
-      final response = await repository.getAllOrders(page: nextPage);
-      
-      state = state.copyWith(
-        orders: [...state.orders, ...response.data.orders],
-        isLoadingMore: false,
-        meta: response.meta,
-        currentPage: nextPage,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoadingMore: false,
-        error: e.toString(),
-      );
-    }
-  }
-
-  // Filter orders by status
-  Future<void> filterByStatus(String status) async {
-    try {
-      state = state.copyWith(isLoading: true, error: null);
       final response = await repository.getOrdersByStatus(status);
+
       state = state.copyWith(
-        orders: response.data.orders,
+        orders: response.data,
+        meta: response.pagination,
         isLoading: false,
-        meta: response.meta,
         currentPage: 1,
-        currentFilter: status,
+        error: null,
       );
     } catch (e) {
       state = state.copyWith(
@@ -74,23 +95,27 @@ class OrderController extends StateNotifier<OrderState> {
     }
   }
 
-  // Refresh orders
+  /// ================= REFRESH =================
   Future<void> refreshOrders() async {
-    return loadOrders();
+    if (state.currentFilter == 'All') {
+      await loadOrders();
+    } else {
+      await filterByStatus(state.currentFilter);
+    }
   }
 }
 
-// Order State for better state management
+/// ================= STATE =================
 class OrderState {
   final List<AlOrder> orders;
-  final AlMeta meta;
+  final AlMeta  meta;
   final bool isLoading;
   final bool isLoadingMore;
   final String? error;
   final int currentPage;
   final String currentFilter;
 
-  OrderState({
+  const OrderState({
     this.orders = const [],
     this.meta = const AlMeta(
       currentPage: 1,
@@ -119,14 +144,16 @@ class OrderState {
       meta: meta ?? this.meta,
       isLoading: isLoading ?? this.isLoading,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      error: error ?? this.error,
+      error: error,
       currentPage: currentPage ?? this.currentPage,
       currentFilter: currentFilter ?? this.currentFilter,
     );
   }
 }
 
-final orderControllerProvider = StateNotifierProvider<OrderController, OrderState>((ref) {
+/// ================= PROVIDER =================
+final orderControllerProvider =
+    StateNotifierProvider<OrderController, OrderState>((ref) {
   final repo = ref.watch(orderRepositoryProvider);
   return OrderController(repo);
 });

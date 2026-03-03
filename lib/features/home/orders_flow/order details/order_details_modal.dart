@@ -96,6 +96,8 @@ class OrderDetails {
   final String updatedAt;
   final bool isMultiStop;
   final List<OrderStop> stops;
+  final OtpInfo pickupOtp;
+  final OtpInfo deliveryOtp;
 
   OrderDetails({
     required this.id,
@@ -118,9 +120,13 @@ class OrderDetails {
     required this.updatedAt,
     required this.isMultiStop,
     required this.stops,
+    required this.pickupOtp,
+    required this.deliveryOtp,
   });
 
   factory OrderDetails.fromJson(Map<String, dynamic> json) {
+    final otpJson = json["otp"] ?? {};
+
     return OrderDetails(
       id: json["id"] ?? 0,
       orderNumber: json["order_number"] ?? "",
@@ -149,6 +155,10 @@ class OrderDetails {
       delivery: Delivery.fromJson(json),
       createdAt: json["created_at"] ?? "",
       updatedAt: json["updated_at"] ?? "",
+
+      /// 🔥 NEW
+      pickupOtp: OtpInfo.fromJson(otpJson["pickup"]),
+      deliveryOtp: OtpInfo.fromJson(otpJson["delivery"]),
     );
   }
 }
@@ -213,23 +223,19 @@ class Driver {
   final String phone;
   final String rating;
 
-  Driver({
-    required this.name,
-    required this.phone,
-    required this.rating,
-  });
+  Driver({required this.name, required this.phone, required this.rating});
 
   factory Driver.fromJson(dynamic json) {
-  if (json == null || json is! Map<String, dynamic>) {
-    return Driver(name: "", phone: "", rating: "");
-  }
+    if (json == null || json is! Map<String, dynamic>) {
+      return Driver(name: "", phone: "", rating: "");
+    }
 
-  return Driver(
-    name: json["name"] ?? json["user"]?["name"] ?? "",
-    phone: json["phone"] ?? json["user"]?["phone"] ?? "",
-    rating: json["rating"]?.toString() ?? "",
-  );
-}
+    return Driver(
+      name: json["name"] ?? json["user"]?["name"] ?? "",
+      phone: json["phone"] ?? json["user"]?["phone"] ?? "",
+      rating: json["rating"]?.toString() ?? "",
+    );
+  }
 }
 
 class Pricing {
@@ -268,6 +274,7 @@ class OrderItem {
   final String description;
   final String weight;
   final String declaredValue;
+  final String dimensions;
   final int quantity;
 
   OrderItem({
@@ -275,6 +282,7 @@ class OrderItem {
     required this.description,
     required this.weight,
     required this.declaredValue,
+    required this.dimensions,
     required this.quantity,
   });
 
@@ -283,6 +291,7 @@ class OrderItem {
     description: json["description"] ?? "",
     weight: json["weight_kg"]?.toString() ?? "",
     declaredValue: json["declared_value"]?.toString() ?? "",
+    dimensions: json["dimensions"]?.toString() ?? "",
     quantity: json["quantity"] ?? 0,
   );
 
@@ -395,4 +404,40 @@ class Delivery {
   //   latitude: json["delivery_latitude"]?.toString(),
   //   longitude: json["delivery_longitude"]?.toString(),
   // );
+}
+
+class OtpInfo {
+  final String? code;
+  final bool required;
+  final bool verified;
+  final String? verifiedAt;
+  final String? note;
+
+  OtpInfo({
+    this.code,
+    required this.required,
+    required this.verified,
+    this.verifiedAt,
+    this.note,
+  });
+
+  factory OtpInfo.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return OtpInfo(
+        code: null,
+        required: false,
+        verified: false,
+        verifiedAt: null,
+        note: null,
+      );
+    }
+
+    return OtpInfo(
+      code: json["code"]?.toString(),
+      required: parseBool(json["required"]),
+      verified: parseBool(json["verified"]),
+      verifiedAt: json["verified_at"],
+      note: json["note"],
+    );
+  }
 }

@@ -10,12 +10,12 @@ import 'package:logisticscustomer/features/home/orders_flow/create_orders_screen
 import 'package:logisticscustomer/features/home/main_screens/home_screen/home_controller.dart';
 import 'package:logisticscustomer/features/home/main_screens/home_screen/view_all.dart';
 import 'package:logisticscustomer/features/home/notification_screen.dart';
-import 'package:logisticscustomer/features/home/orders_flow/ordr_tracking/order_tracking_screen.dart';
 import 'package:logisticscustomer/services/notification_service.dart';
 
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../constants/gps_location.dart';
+import '../../../bottom_navbar/bottom_navbar_screen.dart';
 import '../../Get_Profile/get_profile_controller.dart';
 
 class DashboardShimmer extends StatelessWidget {
@@ -224,28 +224,14 @@ class _CurrentScreenState extends ConsumerState<CurrentScreen> {
     });
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   Future.microtask(() {
-  //     ref.read(dashboardControllerProvider.notifier).loadDashboard();
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(dashboardControllerProvider);
 
-    // final orderResponse = ref.watch(orderControllerProvider);
-
     return state.when(
       loading: () => const DashboardShimmer(),
-      // error: (e, st) => Scaffold(body: Center(child: Text("Error: $e"))),
       error: (e, st) {
-        // if (e.toString().contains("SESSION_EXPIRED")) {
         return SessionExpiredScreen();
-        // }
-        // return Scaffold(body: Center(child: Text("Error: $e")));
       },
 
       data: (dashboard) {
@@ -407,7 +393,9 @@ class _CurrentScreenState extends ConsumerState<CurrentScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => ActiveViewAll(),
+                                      builder: (_) => TripsBottomNavBarScreen(
+                                        initialIndex: 1,
+                                      ),
                                     ),
                                   );
                                 },
@@ -439,7 +427,6 @@ class _CurrentScreenState extends ConsumerState<CurrentScreen> {
 
                           gapH12,
 
-                          // Active Orders ke tile me ye changes karein:
                           dashboard.data.activeOrders.isEmpty
                               ? Container(
                                   width: double.infinity,
@@ -603,42 +590,9 @@ class _CurrentScreenState extends ConsumerState<CurrentScreen> {
                                               children: [
                                                 CustomText(
                                                   txt:
-                                                      "Tracking: ${order.trackingCode}",
+                                                      "Order Create Date: ${order.createdAt != null ? DateFormat('dd MMM yyyy, hh:mm a').format(order.createdAt) : '-'}",
                                                   fontSize: 12,
                                                   color: AppColors.mediumGray,
-                                                ),
-                                                InkWell(
-                                                  onTap: () {
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (_) =>
-                                                            OrderTrackingScreen(
-                                                              trackingCode: order
-                                                                  .trackingCode,
-                                                            ),
-                                                      ),
-                                                    );
-                                                  },
-                                                  child: Row(
-                                                    children: [
-                                                      CustomText(
-                                                        txt: "Track Order",
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        color: AppColors
-                                                            .electricTeal,
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Icon(
-                                                        Icons.arrow_forward,
-                                                        size: 12,
-                                                        color: AppColors
-                                                            .electricTeal,
-                                                      ),
-                                                    ],
-                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -1022,7 +976,6 @@ class DashboardAppBar extends ConsumerWidget implements PreferredSizeWidget {
           loading: () => _loadingText(width: 110),
           error: (_, __) => _loadingText(width: 110),
         ),
-
 
         /// LOCATION
         profileState.when(

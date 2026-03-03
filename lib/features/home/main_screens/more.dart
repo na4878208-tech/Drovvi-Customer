@@ -8,6 +8,8 @@ import 'package:logisticscustomer/features/home/wallet_flow/wallet_screen.dart';
 import 'package:logisticscustomer/features/support/customer_support.dart';
 import 'package:logisticscustomer/features/support/terms_and_condition.dart';
 
+import '../../support/privicy_policy.dart';
+
 class BuyerMoreScreen extends ConsumerStatefulWidget {
   const BuyerMoreScreen({super.key});
 
@@ -91,21 +93,9 @@ class _BuyerMoreScreenState extends ConsumerState<BuyerMoreScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => TermsPrivacyScreen(
-                        title: "Terms & Conditions",
-                        content: """
-1. Acceptance of Terms  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-2. User Obligations  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-3. Liability  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-4. Governing Law  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-""",
+                      builder: (_) => const TermsConditionWebViewScreen(
+                        title: "Terms of Service",
+                        url: "https://drovvi.com/terms-of-service",
                       ),
                     ),
                   );
@@ -131,21 +121,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => TermsPrivacyScreen(
+                      builder: (_) => const TermsPrivacyWebViewScreen(
                         title: "Privacy Policy",
-                        content: """
-1. Acceptance of Terms  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-2. User Obligations  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-3. Liability  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-4. Governing Law  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-""",
+                        url: "https://drovvi.com/privacy-policy",
                       ),
                     ),
                   );

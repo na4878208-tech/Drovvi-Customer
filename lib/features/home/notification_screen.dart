@@ -4,13 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/constants/jwt.dart';
 import 'package:logisticscustomer/constants/local_storage.dart';
-import 'package:logisticscustomer/constants/userService.dart';
-
 import '../../common_widgets/custom_button.dart';
 import '../../constants/colors.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 // ✅ Add these imports for JWT token
 import 'package:jwt_decode/jwt_decode.dart';
@@ -584,7 +581,6 @@ class NotificationScreen extends StatefulWidget {
 
 class _NotificationScreenState extends State<NotificationScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   List<Map<String, dynamic>> notifications = [];
   bool isLoading = true;
@@ -871,7 +867,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         notifications = [];
 
         for (var doc in ordersSnapshot.docs) {
-          final orderData = doc.data() as Map<String, dynamic>;
+          final orderData = doc.data();
 
           // Order creation notification
           notifications.add({

@@ -68,8 +68,12 @@ class OrderRepository {
   }
 
   // Get orders by status
-  Future<GetOrderResponse> getOrdersByStatus(String status) async {
-    return getAllOrders(status: status);
+  Future<GetOrderResponse> getOrdersByStatus(
+    String status, {
+    int page = 1,
+    int perPage = 10,
+  }) async {
+    return getAllOrders(page: page, perPage: perPage, status: status);
   }
 }
 

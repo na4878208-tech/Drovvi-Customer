@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/features/home/Get_Profile/get_profile_screen.dart';
 import '../../../export.dart';
@@ -51,17 +52,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> selectDate() async {
-    DateTime? pickedDate = await showDatePicker(
+    DateTime initialDate = DateTime.now();
+
+    if (dobController.text.isNotEmpty) {
+      try {
+        // Parse using the same format as displayed
+        initialDate = DateFormat('dd MMM yyyy').parse(dobController.text);
+      } catch (_) {
+        initialDate = DateTime.now();
+      }
+    }
+
+    final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(1990, 1, 1),
+      initialDate: initialDate,
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
 
-    if (pickedDate != null) {
-      dobController.text =
-          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-      checkFields();
+    if (picked != null) {
+      // Format date as dd MMM yyyy for display
+      dobController.text = DateFormat('dd MMM yyyy').format(picked);
     }
   }
 
@@ -117,10 +128,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    const GetProfileScreen(),
-              ),
+              MaterialPageRoute(builder: (context) => const GetProfileScreen()),
             );
           },
           icon: const Icon(Icons.arrow_back_ios_new, size: 18),

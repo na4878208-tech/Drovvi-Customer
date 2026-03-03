@@ -6,6 +6,7 @@ import 'package:logisticscustomer/features/support/terms_and_condition.dart';
 
 import '../../../constants/validation_regx.dart';
 import '../../../export.dart';
+import '../../support/privicy_policy.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -110,22 +111,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => TermsPrivacyScreen(
-                                    title: "Terms & Conditions",
-                                    content: """
-1. Acceptance of Terms  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-2. User Obligations  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-3. Liability  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-4. Governing Law  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-""",
-                                  ),
+                                  builder: (_) =>
+                                      const TermsConditionWebViewScreen(
+                                        title: "Terms of Service",
+                                        url:
+                                            "https://drovvi.com/terms-of-service",
+                                      ),
                                 ),
                               );
                             },
@@ -150,22 +141,12 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => TermsPrivacyScreen(
-                                    title: "Privacy Policy",
-                                    content: """
-1. Acceptance of Terms  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-2. User Obligations  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-3. Liability  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-4. Governing Law  
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-""",
-                                  ),
+                                  builder: (_) =>
+                                      const TermsPrivacyWebViewScreen(
+                                        title: "Privacy Policy",
+                                        url:
+                                            "https://drovvi.com/privacy-policy",
+                                      ),
                                 ),
                               );
                             },
@@ -223,18 +204,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                       }
 
                       if (state is AsyncError) {
-                        // final errorMessage = state.error
-                        // .toString()
-                        // .replaceFirst('Exception: ', '');
-
                         AppSnackBar.showError(context, "Email Already Exist!");
-
-                        // ScaffoldMessenger.of(context).showSnackBar(
-                        //   SnackBar(
-                        //     content: Text("Email Already Exist!"),
-                        //     backgroundColor: Colors.red,
-                        //   ),
-                        // );
                       }
                     },
                   ),

@@ -221,7 +221,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                             highlightColor: Colors.grey.shade100,
                             child: Column(
                               children: List.generate(
-                                3,
+                                7,
                                 (_) => transactionShimmer(),
                               ),
                             ),

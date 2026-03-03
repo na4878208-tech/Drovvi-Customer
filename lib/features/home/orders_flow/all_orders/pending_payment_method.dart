@@ -7,16 +7,20 @@ import 'package:http/http.dart' as http;
 import 'package:logisticscustomer/features/home/orders_flow/create_orders_screens/fetch_order/place_order_modal.dart';
 import 'package:logisticscustomer/features/home/orders_flow/payment_method_orders/payment_method_screen.dart';
 import 'dart:convert';
+import '../../../../constants/bottom_show.dart';
 import '../../../../export.dart';
-
-
 
 class PaymentOptionsModal extends ConsumerStatefulWidget {
   final AlOrder order;
   final WidgetRef ref;
+  final BuildContext parentContext;
 
-  const PaymentOptionsModal({Key? key, required this.order, required this.ref})
-    : super(key: key);
+  const PaymentOptionsModal({
+    super.key,
+    required this.order,
+    required this.ref,
+    required this.parentContext,
+  });
 
   @override
   ConsumerState<PaymentOptionsModal> createState() =>
@@ -36,7 +40,7 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
 
     try {
       // Replace with your actual API base URL
-      final baseUrl = 'seedlink.skyguruu.com/api/v1/customer/payment';
+      final baseUrl = 'https://drovvi.com/api/v1/customer/payment';
       final url = Uri.parse('$baseUrl/orders/${widget.order.id}/pay-wallet');
 
       // Get token from your storage (adjust as per your auth implementation)
@@ -58,14 +62,15 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
         print("Wallet Payment Response Success: ${result['success']}");
 
         if (result['success'] == true) {
-          // Success - show confirmation and refresh orders
-          _showSuccessDialog('Payment successful via wallet!');
-
-          // Refresh orders list
-          widget.ref.read(orderControllerProvider.notifier).refreshOrders();
-
-          // Close bottom sheet
           Navigator.pop(context);
+
+          /// ✅ SMALL DELAY (VERY IMPORTANT)
+          Future.delayed(const Duration(milliseconds: 300), () {
+            AppSnackBar.showSuccess(context, "Payment successful via wallet!");
+
+            /// ✅ REFRESH ORDERS
+            widget.ref.read(orderControllerProvider.notifier).refreshOrders();
+          });
         } else {
           setState(() {
             _errorMessage = result['message'] ?? 'Payment failed';
@@ -94,7 +99,7 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
     });
 
     try {
-      final baseUrl = 'seedlink.skyguruu.com/api/v1/customer/payment';
+      final baseUrl = 'https://drovvi.com/api/v1/customer/payment';
       final url = Uri.parse('$baseUrl/orders/${widget.order.id}/pay-card');
 
       // final token = await _getAuthToken();
@@ -127,9 +132,13 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
             _openPaymentWebView(checkoutUrl, OrderResponse.fromJson(result));
           } else {
             // Direct success
-            _showSuccessDialog('Payment successful via card!');
-            widget.ref.read(orderControllerProvider.notifier).refreshOrders();
             Navigator.pop(context);
+
+            Future.delayed(const Duration(milliseconds: 300), () {
+              AppSnackBar.showSuccess(context, "Payment successful via card!");
+
+              widget.ref.read(orderControllerProvider.notifier).refreshOrders();
+            });
           }
         } else {
           setState(() {
@@ -152,26 +161,6 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
     }
   }
 
-  void _showSuccessDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Icon(Icons.check_circle, color: Colors.green, size: 60),
-        content: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, color: AppColors.darkText),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('OK', style: TextStyle(color: AppColors.electricTeal)),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _openPaymentWebView(String url, OrderResponse orderResponse) {
     final payment = orderResponse.data.payment;
 
@@ -187,12 +176,11 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
         builder: (_) => PaymentWebViewScreen(
           checkoutUrl: payment!.checkoutUrl,
           reference: payment.reference,
-           orderId: widget.order.id ?? 0 
+          orderId: widget.order.id,
           // orderId: order.id,
         ),
       ),
     );
-
   }
 
   @override
@@ -236,7 +224,7 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
           const SizedBox(height: 4),
 
           Text(
-            "Amount: R ${widget.order.finalCost ?? '--'}",
+            "Amount: R ${widget.order.finalCost}",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
