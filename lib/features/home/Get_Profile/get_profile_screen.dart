@@ -493,7 +493,6 @@ class _GetProfileScreenState extends ConsumerState<GetProfileScreen> {
             loading: () => _loadingText(width: 90),
             error: (_, __) => _loadingText(width: 90),
           ),
-          // defaultAddressUI(),
           gapH32,
         ],
       ),

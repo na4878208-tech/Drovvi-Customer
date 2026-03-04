@@ -114,12 +114,6 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                       color: AppColors.darkText,
                       fontWeight: FontWeight.w600,
                     ),
-                    // const SizedBox(width: 6),
-                    // Icon(
-                    //   Icons.edit_outlined,
-                    //   color: AppColors.electricTeal,
-                    //   size: 18,
-                    // ),
                   ],
                 ),
                 const SizedBox(height: 30),
@@ -251,21 +245,12 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                           _seconds = 59;
                         });
                         startTimer();
-                        // ScaffoldMessenger.of(context).showSnackBar(
-                        //   const SnackBar(
-                        //     content: Text("OTP Resend Successfully"),
-                        //   ),
-                        // );
                         AppSnackBar.showSuccess(
                           context,
                           "OTP Resend Successfully",
                         );
                       } else if (state is AsyncError) {
                         AppSnackBar.showWarning(context, "Process");
-
-                        // ScaffoldMessenger.of(context).showSnackBar(
-                        //   const SnackBar(content: Text("Process")),
-                        // );
                       }
                     }
                   },

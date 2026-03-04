@@ -294,14 +294,6 @@ class OrderItem {
     dimensions: json["dimensions"]?.toString() ?? "",
     quantity: json["quantity"] ?? 0,
   );
-
-  // factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem(
-  //   productName: json["product_name"] ?? "",
-  //   description: json["description"] ?? "",
-  //   weight: json["weight_kg"] ?? "",
-  //   declaredValue: json["declared_value"] ?? "",
-  //   quantity: json["quantity"] ?? 0,
-  // );
 }
 
 class Depot {
@@ -350,16 +342,6 @@ class Pickup {
       longitude: pickup["longitude"]?.toString(),
     );
   }
-
-  // factory Pickup.fromJson(Map<String, dynamic> json) => Pickup(
-  //   contactName: json["pickup_contact_name"] ?? "",
-  //   contactPhone: json["pickup_contact_phone"] ?? "",
-  //   address: json["pickup_address"] ?? "",
-  //   city: json["pickup_city"] ?? "",
-  //   state: json["pickup_state"] ?? "",
-  //   latitude: json["pickup_latitude"]?.toString(),
-  //   longitude: json["pickup_longitude"]?.toString(),
-  // );
 }
 
 class Delivery {
@@ -394,16 +376,6 @@ class Delivery {
       longitude: delivery["longitude"]?.toString(),
     );
   }
-
-  // factory Delivery.fromJson(Map<String, dynamic> json) => Delivery(
-  //   contactName: json["delivery_contact_name"] ?? "",
-  //   contactPhone: json["delivery_contact_phone"] ?? "",
-  //   address: json["delivery_address"] ?? "",
-  //   city: json["delivery_city"] ?? "",
-  //   state: json["delivery_state"] ?? "",
-  //   latitude: json["delivery_latitude"]?.toString(),
-  //   longitude: json["delivery_longitude"]?.toString(),
-  // );
 }
 
 class OtpInfo {

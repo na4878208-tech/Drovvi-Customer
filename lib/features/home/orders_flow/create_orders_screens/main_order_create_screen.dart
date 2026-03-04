@@ -201,9 +201,6 @@ class UtilsHelper {
         ),
       ),
 
-      // placeholder: (context, url) => Center(
-      //   child: CustomLoader(), // Loading indicator
-      // ),
       errorWidget: (context, url, error) =>
           Icon(Icons.image_outlined, size: 50, color: Colors.blue),
     );

@@ -63,12 +63,6 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
         print("Wallet Payment Response Success: ${result['success']}");
 
         if (result['success'] == true) {
-          // // Close bottom sheet
-          // Navigator.pop(context);
-
-          // // Refresh orders
-          // widget.ref.read(orderControllerProvider.notifier).refreshOrders();
-
           // Navigate to Order Successful screen
           Navigator.pushAndRemoveUntil(
             widget.parentContext,
@@ -182,12 +176,6 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
   void _openPaymentWebView(String url, OrderResponse orderResponse) {
     final payment = orderResponse.data.payment;
 
-    // double amount =
-    //         double.tryParse(amountController.text) ?? 0;
-    // if (amount <= 0) return;
-
-    // 1️⃣ Hit API to get checkout URL
-    // final response = await topUpController.topUp(amount: amount);
     Navigator.push(
       context,
       MaterialPageRoute(

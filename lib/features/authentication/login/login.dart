@@ -209,12 +209,6 @@ class _LoginState extends ConsumerState<Login> {
                               context,
                               "Invalid email or password",
                             );
-                            // ScaffoldMessenger.of(context).showSnackBar(
-                            //   const SnackBar(
-                            //     content: Text("Invalid email or password"),
-                            //     backgroundColor: Colors.red,
-                            //   ),
-                            // );
                           }
                         }
                       : null,

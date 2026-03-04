@@ -106,14 +106,6 @@ class _DropDownContainerState extends State<DropDownContainer> {
                   }
                 },
                 icon: Icon(Icons.keyboard_arrow_down_outlined),
-
-                //  SvgPicture.asset(
-                //   AppImages.arrowDownIcon,
-                //   colorFilter: ColorFilter.mode(
-                //     isDarkMode ? whiteColor : blackColor,
-                //     BlendMode.srcIn,
-                //   ),
-                // ),
               ),
           ],
         ),

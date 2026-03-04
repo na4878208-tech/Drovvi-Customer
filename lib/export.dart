@@ -19,7 +19,6 @@ export 'package:logisticscustomer/common_widgets/custom_text.dart';
 export 'package:pin_code_fields/pin_code_fields.dart';
 export 'dart:async';
 export 'package:logisticscustomer/features/home/main_screens/home_screen/current_screen.dart';
-export 'package:logisticscustomer/features/home/scan_barcode_scanner.dart';
 export 'package:logisticscustomer/features/home/conform_order_screen.dart';
 
 export 'package:logisticscustomer/constants/colors.dart';

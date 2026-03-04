@@ -86,20 +86,3 @@ String? getUserIdFromToken(String token) {
     return null;
   }
 }
- 
-
- 
-// // String? getUserIdFromToken(String token) {
-// //   Map<String, dynamic> payload = Jwt.parseJwt(token);
-// //   return payload['id']?.toString();
-// // }
-
-// String? getUserIdFromToken(String token) {
-//   try {
-//     Map<String, dynamic> payload = Jwt.parseJwt(token);
-//     return payload['id']?.toString();
-//   } catch (e) {
-//     print('❌ Error decoding JWT: $e');
-//     return null;
-//   }
-// }

@@ -67,10 +67,6 @@ class _RestPasswordScreenState extends ConsumerState<RestPasswordScreen> {
 
             AppSnackBar.showSuccess(context, data.message);
 
-            // ScaffoldMessenger.of(
-            //   context,
-            // ).showSnackBar(SnackBar(content: Text(data.message)));
-
             /// ✅ Navigate to Login Screen
             Navigator.pushAndRemoveUntil(
               context,
@@ -85,9 +81,6 @@ class _RestPasswordScreenState extends ConsumerState<RestPasswordScreen> {
 
           AppSnackBar.showError(context, err.toString());
 
-          // ScaffoldMessenger.of(
-          //   context,
-          // ).showSnackBar(SnackBar(content: Text(err.toString())));
         },
       );
     });

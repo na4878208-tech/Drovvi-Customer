@@ -669,11 +669,7 @@ class _CurrentScreenState extends ConsumerState<CurrentScreen> {
                                       .recentOrders // <-- List<RecentOrder> object
                                       .take(3)
                                       .map((order) {
-                                        // <-- 'order' ab RecentOrder type ka object hai
-                                        // Status color set karne ke liye
                                         _getStatusColor(order.status);
-
-                                        // Time format karne ke liye
                                         String formattedTime = DateFormat(
                                           'dd MMM yyyy • hh:mm a',
                                         ).format(order.createdAt);
@@ -815,13 +811,6 @@ class _CurrentScreenState extends ConsumerState<CurrentScreen> {
 
     return GestureDetector(
       onTap: () {
-        // Yahan order details screen pe navigate karein
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => OrderDetailsScreen(orderId: order.id),
-        //   ),
-        // );
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 12),

@@ -140,9 +140,6 @@ class _SetUpProfileState extends ConsumerState<SetUpProfile> {
 
       if (next is AsyncError) {
         AppSnackBar.showError(context, next.error.toString());
-        // ScaffoldMessenger.of(
-        //   context,
-        // ).showSnackBar(SnackBar(content: Text(next.error.toString())));
       }
       print("VERIFICATION TOKEN => ${widget.verificationToken}");
 

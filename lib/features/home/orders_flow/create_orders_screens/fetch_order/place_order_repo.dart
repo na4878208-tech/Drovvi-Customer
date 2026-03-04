@@ -384,10 +384,6 @@ Future<MultiStopOrderRequestBody> prepareMultiStopOrderData() async {
   if (productTypeId == 0 || packagingTypeId == 0) {
     throw Exception("Product or packaging type not selected");
   }
-
-  // ✅ IMPORTANT: Get quantity and weight FROM CACHE (standard order ki tarah)
-  // Standard order: cache["quantity"] aur cache["total_weight"] use karta hai
-  // Multi-stop ko bhi same keys use karni chahiye
   
   final quantityStr = cache["quantity"]?.toString() ?? "1";
   final weightStr = cache["total_weight"]?.toString() ?? "0";

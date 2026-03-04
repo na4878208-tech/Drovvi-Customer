@@ -157,37 +157,6 @@ class _ServicePaymentScreenState extends ConsumerState<ServicePaymentScreen> {
 
     setState(() {});
   }
-
-  // void _printMultiStopDebugInfo() {
-  //   final cache = ref.read(orderCacheProvider);
-  //   print("🔍 DEBUG MULTI-STOP DATA:");
-
-  //   // Check if multi-stop enabled
-  //   print("is_multi_stop_enabled: ${cache["is_multi_stop_enabled"]}");
-
-  //   // Check stops count
-  //   final stopsCount =
-  //       int.tryParse(cache["route_stops_count"]?.toString() ?? "0") ?? 0;
-  //   print("Stops Count: $stopsCount");
-
-  //   // Print each stop data
-  //   for (int i = 1; i <= stopsCount; i++) {
-  //     print("\nStop $i:");
-  //     print("  Type: ${cache["stop_${i}_type"]}");
-  //     print("  Contact Name: ${cache["stop_${i}_contact_name"]}");
-  //     print("  Phone: ${cache["stop_${i}_contact_phone"]}");
-  //     print("  Address: ${cache["stop_${i}_address"]}");
-  //     print("  City: ${cache["stop_${i}_city"]}");
-  //     print("  State: ${cache["stop_${i}_state"]}");
-  //     print("  Latitude: ${cache["stop_${i}_latitude"]}");
-  //     print("  Longitude: ${cache["stop_${i}_longitude"]}");
-  //     print("  Quantity: ${cache["stop_${i}_quantity"]}");
-  //     print("  Weight: ${cache["stop_${i}_weight"]}");
-  //   }
-  // }
-
-  // ServicePaymentScreen class ke andar, _printMultiStopDebugInfo() ke baad ye functions add karo:
-
   void _validateMultiStopDataBeforeQuote() {
     final cache = ref.read(orderCacheProvider);
     final isMultiStop = cache["is_multi_stop_enabled"] == "true";
@@ -231,31 +200,6 @@ class _ServicePaymentScreenState extends ConsumerState<ServicePaymentScreen> {
 
     print("✅ Multi-stop data validation passed!");
   }
-
-  // void _printDebugInfo() {
-  //   final cache = ref.read(orderCacheProvider);
-  //   final isMultiStop = cache["is_multi_stop_enabled"] == "true";
-
-  //   print("🔍 DEBUG BEFORE RETRY:");
-  //   print("Multi-stop: $isMultiStop");
-  //   print("Service Type Selected: ${selectedServiceTypeId ?? 'NOT SELECTED'}");
-  //   print("Product Type ID: ${cache["selected_product_type_id"]}");
-  //   print("Packaging Type ID: ${cache["selected_packaging_type_id"]}");
-
-  //   if (isMultiStop) {
-  //     final stopsCount =
-  //         int.tryParse(cache["route_stops_count"]?.toString() ?? "0") ?? 0;
-  //     print("Stops Count: $stopsCount");
-
-  //     for (int i = 1; i <= stopsCount; i++) {
-  //       print("\nStop $i:");
-  //       print("City: ${cache["stop_${i}_city"]}");
-  //       print("State: ${cache["stop_${i}_state"]}");
-  //       print("Quantity: ${cache["stop_${i}_quantity"]}");
-  //       print("Weight: ${cache["stop_${i}_weight"]}");
-  //     }
-  //   }
-  // }
 
   Future<void> _getSmartQuotes() async {
     if (isLoadingQuotes) return;
@@ -1120,12 +1064,6 @@ class _ServicePaymentScreenState extends ConsumerState<ServicePaymentScreen> {
                                         "Payment check failed",
                                       );
                                       print("Payment check failed: $e");
-
-                                      // ScaffoldMessenger.of(
-                                      //   context,
-                                      // ).showSnackBar(
-                                      //   SnackBar(content: Text(e.toString())),
-                                      // );
                                     },
                                   );
                                 }
@@ -1134,40 +1072,6 @@ class _ServicePaymentScreenState extends ConsumerState<ServicePaymentScreen> {
                       },
                     ),
                   ),
-
-                  // // Place Order Button
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  //   child: Consumer(
-                  //     builder: (context, ref, child) {
-                  //       final isOrderLoading = orderState.isLoading;
-                  //       final hasQuotes =
-                  //           hasCalculatedQuotes &&
-                  //           quoteState.value != null &&
-                  //           quoteState.value!.quotes.isNotEmpty;
-
-                  //       bool canPlaceOrder = hasQuotes && bestQuote != null;
-
-                  //       return CustomButton(
-                  //         text: isOrderLoading
-                  //             ? "Placing Order..."
-                  //             : "Place Order",
-                  //         backgroundColor: canPlaceOrder
-                  //             ? AppColors.electricTeal
-                  //             : AppColors.lightGrayBackground,
-                  //         borderColor: canPlaceOrder
-                  //             ? AppColors.electricTeal
-                  //             : AppColors.electricTeal,
-                  //         textColor: canPlaceOrder
-                  //             ? AppColors.pureWhite
-                  //             : AppColors.electricTeal,
-                  //         onPressed: canPlaceOrder && !isOrderLoading
-                  //             ? () => _place12Order(context)
-                  //             : null,
-                  //       );
-                  //     },
-                  //   ),
-                  // ),
                   gapH12,
                 ],
               ),
@@ -1866,199 +1770,6 @@ class _ServicePaymentScreenState extends ConsumerState<ServicePaymentScreen> {
       ),
     );
   }
-
-  // Quote Error Display
-  // Quote Error Display - IMPROVED VERSION
-  // Widget _buildQuoteError() {
-  //   // Parse error message to extract meaningful info
-  //   String errorMessage = quoteError ?? "Unknown error";
-  //   String? compatibilityMessage;
-
-  //   if (errorMessage.contains("No vehicle types compatible with") ||
-  //       errorMessage.contains("compatible")) {
-  //     final RegExp regex = RegExp(r'compatible with (.*?)(?:\.|$)');
-  //     final match = regex.firstMatch(errorMessage);
-  //     if (match != null) {
-  //       final productName = match.group(1) ?? "selected product";
-  //       compatibilityMessage = "No vehicles available for '$productName'";
-  //     } else {
-  //       compatibilityMessage = "No compatible vehicles found";
-  //     }
-
-  //     errorMessage = errorMessage.replaceAll(
-  //       RegExp(r'Exception: |throwable: |DioError: '),
-  //       '',
-  //     );
-  //   }
-
-  //   final bool isCompatibilityIssue = compatibilityMessage != null;
-
-  //   return Container(
-  //     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-  //     padding: const EdgeInsets.all(18),
-  //     decoration: BoxDecoration(
-  //       color: const Color(0xFFF4F9F9),
-  //       borderRadius: BorderRadius.circular(16),
-  //       border: Border.all(color: const Color(0xFF00B3A4).withOpacity(0.25)),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.black.withOpacity(0.04),
-  //           blurRadius: 12,
-  //           offset: const Offset(0, 6),
-  //         ),
-  //       ],
-  //     ),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         /// 🔹 HEADER
-  //         Row(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             Container(
-  //               padding: const EdgeInsets.all(10),
-  //               decoration: BoxDecoration(
-  //                 color: const Color(0xFF00B3A4).withOpacity(0.12),
-  //                 borderRadius: BorderRadius.circular(12),
-  //               ),
-  //               child: const Icon(
-  //                 Icons.local_shipping_outlined,
-  //                 color: Color(0xFF00B3A4),
-  //                 size: 22,
-  //               ),
-  //             ),
-  //             const SizedBox(width: 14),
-  //             Expanded(
-  //               child: Column(
-  //                 crossAxisAlignment: CrossAxisAlignment.start,
-  //                 children: [
-  //                   Text(
-  //                     isCompatibilityIssue
-  //                         ? "Service Not Available"
-  //                         : "Unable to Generate Quote",
-  //                     style: const TextStyle(
-  //                       fontSize: 17,
-  //                       fontWeight: FontWeight.w700,
-  //                       color: Color(0xFF1E2A2A),
-  //                     ),
-  //                   ),
-  //                   const SizedBox(height: 4),
-  //                   Text(
-  //                     isCompatibilityIssue
-  //                         ? compatibilityMessage!
-  //                         : "Please review shipment details and try again.",
-  //                     style: TextStyle(
-  //                       fontSize: 13.5,
-  //                       color: Colors.grey[700],
-  //                       height: 1.4,
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-
-  //         const SizedBox(height: 18),
-
-  //         /// 🔹 ERROR DETAILS BOX
-  //         Container(
-  //           padding: const EdgeInsets.all(14),
-  //           decoration: BoxDecoration(
-  //             color: Colors.white,
-  //             borderRadius: BorderRadius.circular(12),
-  //             border: Border.all(color: Colors.grey.shade200),
-  //           ),
-  //           child: Row(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Icon(
-  //                 Icons.info_outline,
-  //                 size: 18,
-  //                 color: Colors.orange.shade700,
-  //               ),
-  //               const SizedBox(width: 8),
-  //               Expanded(
-  //                 child: Text(
-  //                   errorMessage.isNotEmpty
-  //                       ? errorMessage
-  //                       : "Please fill in the required fields correctly.",
-  //                   style: TextStyle(
-  //                     fontSize: 13.5,
-  //                     color: Colors.grey[800],
-  //                     height: 1.5,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-
-  //         if (errorMessage.contains("product_type_id"))
-  //           Padding(
-  //             padding: const EdgeInsets.only(top: 10),
-  //             child: Text(
-  //               "Tip: This shipment type may not be supported in the selected region.",
-  //               style: TextStyle(
-  //                 fontSize: 12,
-  //                 color: Colors.grey[600],
-  //                 fontStyle: FontStyle.italic,
-  //               ),
-  //             ),
-  //           ),
-
-  //         const SizedBox(height: 20),
-
-  //         /// 🔹 ACTION BUTTONS
-  //         Row(
-  //           children: [
-  //             Expanded(
-  //               child: OutlinedButton(
-  //                 onPressed: () {
-  //                   Navigator.pop(context);
-  //                 },
-  //                 style: OutlinedButton.styleFrom(
-  //                   foregroundColor: const Color(0xFF00B3A4),
-  //                   side: const BorderSide(color: Color(0xFF00B3A4)),
-  //                   padding: const EdgeInsets.symmetric(vertical: 14),
-  //                   shape: RoundedRectangleBorder(
-  //                     borderRadius: BorderRadius.circular(12),
-  //                   ),
-  //                 ),
-  //                 child: const Text(
-  //                   "Edit Details",
-  //                   style: TextStyle(fontWeight: FontWeight.w600),
-  //                 ),
-  //               ),
-  //             ),
-  //             const SizedBox(width: 12),
-  //             Expanded(
-  //               child: ElevatedButton(
-  //                 onPressed: () {
-  //                   _getSmartQuotes();
-  //                 },
-  //                 style: ElevatedButton.styleFrom(
-  //                   backgroundColor: const Color(0xFF00B3A4),
-  //                   foregroundColor: Colors.white,
-  //                   padding: const EdgeInsets.symmetric(vertical: 14),
-  //                   elevation: 0,
-  //                   shape: RoundedRectangleBorder(
-  //                     borderRadius: BorderRadius.circular(12),
-  //                   ),
-  //                 ),
-  //                 child: const Text(
-  //                   "Try Again",
-  //                   style: TextStyle(fontWeight: FontWeight.w600),
-  //                 ),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Widget _buildQuoteError() {
     // Sirf error message le lo, kuch mat karo
     String errorMessage = quoteError ?? "Unknown error";

@@ -256,11 +256,6 @@ class _RestVerificationScreenState
                           context,
                           "OTP resent successfully",
                         );
-                        // ScaffoldMessenger.of(context).showSnackBar(
-                        //   const SnackBar(
-                        //     content: Text("OTP resent successfully"),
-                        //   ),
-                        // );
                       }
                     }
                   },
