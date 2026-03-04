@@ -15,12 +15,12 @@ plugins {
 }
 
 android {
-    namespace = "com.yourcompany.logisticscustomer"
+    namespace = "com.drovvi.logisticscustomer"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     defaultConfig {
-        applicationId = "com.yourcompany.logisticscustomer"
+        applicationId = "com.drovvi.logisticscustomer"
         minSdk = 28
         targetSdk = 36
         versionCode = flutter.versionCode
