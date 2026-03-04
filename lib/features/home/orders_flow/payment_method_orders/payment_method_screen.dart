@@ -7,6 +7,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../../../../common_widgets/custom_button.dart';
 import '../../../../main.dart';
 import '../../order_successful.dart';
+import '../../wallet_flow/wallet_screen.dart';
 import '../all_orders/orders_controller.dart';
 import '../create_orders_screens/calculate_quotes/calculate_quote_controller.dart';
 import '../create_orders_screens/fetch_order/place_order_controller.dart'
@@ -93,8 +94,7 @@ class _PaymentMethodModalState extends ConsumerState<PaymentMethodModal> {
 
       // WALLET OR PAY LATER
       if (selectedMethod == 'wallet' || selectedMethod == 'pay_later') {
-        Navigator.pushAndRemoveUntil(
-          context,
+        rootNavigatorKey.currentState?.pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (_) => OrderSuccessful(
               orderNumber: order.orderNumber,
@@ -118,7 +118,7 @@ class _PaymentMethodModalState extends ConsumerState<PaymentMethodModal> {
           final payment = orderResponse.data.payment;
           if (payment != null && payment.checkoutUrl.isNotEmpty) {
             // WebView open karo **order already created hai, cache cleared hai**
-            Navigator.pop(context);
+            // Navigator.pop(context);
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -132,8 +132,7 @@ class _PaymentMethodModalState extends ConsumerState<PaymentMethodModal> {
             throw Exception("Payment URL not received from server");
           }
         } else {
-          Navigator.pushAndRemoveUntil(
-            context,
+          rootNavigatorKey.currentState?.pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (_) => OrderSuccessful(
                 orderNumber: order.orderNumber,
@@ -156,14 +155,6 @@ class _PaymentMethodModalState extends ConsumerState<PaymentMethodModal> {
       print("❌ Error placing order: $e");
 
       AppSnackBar.showError(context, "Payment failed : Please try again");
-
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text(e.toString()),
-      //     backgroundColor: Colors.red,
-      //     duration: const Duration(seconds: 5),
-      //   ),
-      // );
     }
   }
 
@@ -405,28 +396,37 @@ class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
         if (_paymentCompleted) return;
         _paymentCompleted = true;
 
-        try {
-          print("🔄 Payment success detected, waiting for backend update...");
+        print("✅ Payment Success URL Detected");
 
-          final repository = ref.read(placeOrderRepositoryProvider);
-
-          Order updatedOrder;
-          int retryCount = 0;
-
-          // ⏳ Retry max 5 times (every 1.5 sec)
-          do {
-            await Future.delayed(const Duration(milliseconds: 1500));
-            updatedOrder = await repository.getOrderById(widget.orderId);
-
-            print(
-              "🔁 Retry $retryCount → Payment Status: ${updatedOrder.paymentStatus}",
-            );
-
-            retryCount++;
-          } while (updatedOrder.paymentStatus.toLowerCase() != "paid" &&
-              retryCount < 5);
+        // ===============================
+        // 🟢 WALLET TOPUP CASE
+        // ===============================
+        if (widget.orderId == 0) {
+          print("💰 Wallet Topup Success - Closing WebView");
 
           if (!mounted) return;
+
+          rootNavigatorKey.currentState?.pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const WalletScreen()),
+            (route) => false,
+          );
+
+          return;
+        }
+
+        // ===============================
+        // 🔵 ORDER PAYMENT CASE
+        // ===============================
+        try {
+          final repository = ref.read(placeOrderRepositoryProvider);
+
+          // 🔥 Directly fetch updated order once (no loop)
+          final updatedOrder = await repository.getOrderById(widget.orderId);
+
+          if (!mounted) return;
+
+          // 🔄 Refresh Orders Provider
+          ref.read(orderControllerProvider.notifier).refreshOrders();
 
           rootNavigatorKey.currentState?.pushAndRemoveUntil(
             MaterialPageRoute(
@@ -440,13 +440,11 @@ class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
                 trackingCode: updatedOrder.trackingCode,
                 totalWeightKg: updatedOrder.totalWeightKg,
                 paymentMethod: "card",
-                paymentStatus: updatedOrder.paymentStatus,
+                paymentStatus: "Paid",
               ),
             ),
             (route) => false,
           );
-
-          print("✅ Final Payment Status: ${updatedOrder.paymentStatus}");
         } catch (e) {
           print("❌ Error fetching updated order: $e");
         }
@@ -481,35 +479,6 @@ class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
             },
           ),
         ],
-
-        // leading: IconButton(
-        //   icon: const Icon(Icons.arrow_back),
-        //   onPressed: () {
-        //     // Ask for confirmation before closing
-        //     showDialog(
-        //       context: context,
-        //       builder: (context) => AlertDialog(
-        //         title: const Text("Cancel Payment?"),
-        //         content: const Text(
-        //           "Are you sure you want to cancel the payment?",
-        //         ),
-        //         actions: [
-        //           TextButton(
-        //             onPressed: () => Navigator.pop(context),
-        //             child: const Text("No"),
-        //           ),
-        //           TextButton(
-        //             onPressed: () {
-        //               Navigator.pop(context); // Close dialog
-        //               Navigator.pop(context); // Close WebView
-        //             },
-        //             child: const Text("Yes"),
-        //           ),
-        //         ],
-        //       ),
-        //     );
-        //   },
-        // ),
       ),
 
       body: Stack(
@@ -519,14 +488,7 @@ class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
             const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: Colors.teal),
-                  // SizedBox(height: 16),
-                  // Text(
-                  //   "Loading payment gateway...",
-                  //   style: TextStyle(color: Colors.teal, fontSize: 16),
-                  // ),
-                ],
+                children: [CircularProgressIndicator(color: Colors.teal)],
               ),
             ),
         ],

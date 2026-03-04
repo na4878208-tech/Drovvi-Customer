@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logisticscustomer/common_widgets/custom_text.dart';
-import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/export.dart';
 import 'package:logisticscustomer/features/home/orders_flow/payment_method_orders/payment_method_screen.dart';
 import '../../../../common_widgets/cuntom_textfield.dart';
@@ -78,18 +77,7 @@ class _WalletTopUPScreenState extends ConsumerState<WalletTopUPScreen> {
                   // 1️⃣ Hit API to get checkout URL
                   final response = await topUpController.topUp(amount: amount);
                   if (response != null) {
-                    // 2️⃣ Open WebView for checkout
-                    // final result = await Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (_) => YocoPaymentWebView(
-                    //       checkoutUrl: response.data.checkoutUrl,
-                    //       reference: response.data.reference,
-                    //     ),
-                    //   ),
-                    // );
-
-                    final result = await Navigator.push(
+                    Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => PaymentWebViewScreen(
@@ -106,31 +94,6 @@ class _WalletTopUPScreenState extends ConsumerState<WalletTopUPScreen> {
                         ),
                       ),
                     );
-
-                    // 3️⃣ Show result
-                    if (result != null && result['success'] == true) {
-                      AppSnackBar.showSuccess(context, "Payment Successful!");
-
-                      // ScaffoldMessenger.of(context).showSnackBar(
-                      //   SnackBar(
-                      //     content: Text("Payment Successful!"),
-                      //     backgroundColor: Colors.green,
-                      //   ),
-                      // );
-                    } else {
-                      print("Wallet Payment failed : Please try again $result");
-                      AppSnackBar.showError(
-                        context,
-                        "Wallet Payment failed : Please try again",
-                      );
-
-                      // ScaffoldMessenger.of(context).showSnackBar(
-                      //   SnackBar(
-                      //     content: Text(result?['message'] ?? "Payment failed"),
-                      //     backgroundColor: Colors.red,
-                      //   ),
-                      // );
-                    }
                   }
                 },
               ),

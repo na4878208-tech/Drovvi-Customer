@@ -8,6 +8,7 @@ import 'package:logisticscustomer/features/home/wallet_flow/top_up/wallet_topup_
 import 'package:shimmer/shimmer.dart';
 
 import '../../../constants/colors.dart';
+import '../../bottom_navbar/bottom_navbar_screen.dart';
 import 'balance/balance_controller.dart';
 import 'transaction_history/transaction_history_controller.dart';
 
@@ -23,9 +24,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   void initState() {
     super.initState();
 
-    // Auto load data when screen opens
-    Future.microtask(() {
-      ref
+    Future.microtask(() async {
+      // ignore: unused_result
+      ref.refresh(walletBalanceControllerProvider);
+      await ref
           .read(walletTransactionControllerProvider.notifier)
           .fetchTransactions();
     });
@@ -73,7 +75,17 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       child: RotatedBox(
                         quarterTurns: 2,
                         child: IconButton(
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const TripsBottomNavBarScreen(
+                                      initialIndex: 3,
+                                    ),
+                              ),
+                            );
+                          },
                           icon: const Icon(
                             Icons.arrow_forward_rounded,
                             color: AppColors.pureWhite,
@@ -149,13 +161,17 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                                       ),
                                       GestureDetector(
                                         onTap: () async {
-                                          Navigator.push(
+                                          final result = await Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
-                                                  WalletTopUPScreen(),
+                                                  const WalletTopUPScreen(),
                                             ),
                                           );
+
+                                          if (result == true) {
+                                            _refreshWallet();
+                                          }
                                         },
                                         child: Row(
                                           children: [

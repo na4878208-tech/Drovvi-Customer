@@ -9,6 +9,7 @@ import 'package:logisticscustomer/features/home/orders_flow/payment_method_order
 import 'dart:convert';
 import '../../../../constants/bottom_show.dart';
 import '../../../../export.dart';
+import '../../order_successful.dart';
 
 class PaymentOptionsModal extends ConsumerStatefulWidget {
   final AlOrder order;
@@ -62,15 +63,32 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
         print("Wallet Payment Response Success: ${result['success']}");
 
         if (result['success'] == true) {
-          Navigator.pop(context);
+          // // Close bottom sheet
+          // Navigator.pop(context);
 
-          /// ✅ SMALL DELAY (VERY IMPORTANT)
-          Future.delayed(const Duration(milliseconds: 300), () {
-            AppSnackBar.showSuccess(context, "Payment successful via wallet!");
+          // // Refresh orders
+          // widget.ref.read(orderControllerProvider.notifier).refreshOrders();
 
-            /// ✅ REFRESH ORDERS
-            widget.ref.read(orderControllerProvider.notifier).refreshOrders();
-          });
+          // Navigate to Order Successful screen
+          Navigator.pushAndRemoveUntil(
+            widget.parentContext,
+            MaterialPageRoute(
+              builder: (_) => OrderSuccessful(
+                orderNumber: widget.order.orderNumber,
+                status: "paid",
+                totalAmount: double.tryParse(widget.order.finalCost) ?? 0.0,
+                createedAt: widget.order.createdAt,
+                distanceKm: double.tryParse(widget.order.distanceKm) ?? 0.0,
+                finalCost: double.tryParse(widget.order.finalCost) ?? 0.0,
+                trackingCode: widget.order.trackingCode,
+                totalWeightKg:
+                    double.tryParse(widget.order.totalWeightKg) ?? 0.0,
+                paymentMethod: "wallet",
+                paymentStatus: "paid",
+              ),
+            ),
+            (route) => false,
+          );
         } else {
           setState(() {
             _errorMessage = result['message'] ?? 'Payment failed';

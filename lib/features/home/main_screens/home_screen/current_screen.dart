@@ -590,7 +590,7 @@ class _CurrentScreenState extends ConsumerState<CurrentScreen> {
                                               children: [
                                                 CustomText(
                                                   txt:
-                                                      "Order Create Date: ${order.createdAt != null ? DateFormat('dd MMM yyyy, hh:mm a').format(order.createdAt) : '-'}",
+                                                      "Order Create Date: ${DateFormat('dd MMM yyyy, hh:mm a').format(order.createdAt)}",
                                                   fontSize: 12,
                                                   color: AppColors.mediumGray,
                                                 ),
