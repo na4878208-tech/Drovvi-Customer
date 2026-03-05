@@ -162,66 +162,106 @@ class OrderSuccessful extends StatelessWidget {
               const SizedBox(height: 25),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.electricTeal,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  TripsBottomNavBarScreen(initialIndex: 2, trackingCode: trackingCode,),
+                child: paymentMethod.toLowerCase() == "pay_later"
+                    ? SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: AppColors.electricTeal,
+                              width: 1,
                             ),
-                          );
-                        },
-                        child: const Text(
-                          "Track Order",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(
-                            color: AppColors.electricTeal,
-                            width: 1,
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  TripsBottomNavBarScreen(initialIndex: 0),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          );
-                        },
-                        child: Text(
-                          "Back to Home",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.electricTeal,
+                          ),
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    TripsBottomNavBarScreen(initialIndex: 0),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Back to Home",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: AppColors.electricTeal,
+                            ),
                           ),
                         ),
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.electricTeal,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => TripsBottomNavBarScreen(
+                                      initialIndex: 2,
+                                      trackingCode: trackingCode,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "Track Order",
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(
+                                  color: AppColors.electricTeal,
+                                  width: 1,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        TripsBottomNavBarScreen(
+                                          initialIndex: 0,
+                                        ),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "Back to Home",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: AppColors.electricTeal,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
               ),
               const SizedBox(height: 30),
             ],

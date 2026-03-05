@@ -94,7 +94,7 @@ class _LoginState extends ConsumerState<Login> {
               ),
               const SizedBox(height: 10),
               const Text(
-                "Please enter your email id or password to Sign In.",
+                "Please enter your email or password to Sign In.",
                 style: TextStyle(color: AppColors.mediumGray, fontSize: 14),
                 textAlign: TextAlign.center,
               ),

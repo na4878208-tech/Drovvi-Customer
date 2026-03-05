@@ -1,6 +1,4 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:logisticscustomer/constants/bottom_show.dart';
@@ -91,6 +89,15 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
   TextEditingController? _currentStateController;
   TextEditingController? _currentPostalController;
 
+  // Flags to track if listeners are added
+  bool _pickupListenerAdded = false;
+  bool _deliveryListenerAdded = false;
+  final Map<int, bool> _stopListenersAdded = {};
+  final Map<String, bool> _addressListenersAdded = {};
+
+  // **FIX: Flag to prevent suggestions on initial load**
+  bool _isInitialLoadComplete = false;
+
   @override
   void initState() {
     super.initState();
@@ -129,7 +136,9 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
       ref.read(productTypeControllerProvider.notifier).loadProductTypes();
       ref.read(packagingTypeControllerProvider.notifier).loadPackagingTypes();
 
+      // **FIX: Mark initial load complete after all data is loaded**
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        _isInitialLoadComplete = true;
         _checkFormFilled();
       });
     });
@@ -140,11 +149,10 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
 
   void _initializeMultiStop() {
     setState(() {
-      // Pehle existing links clear karo
       _stopLayerLinks.clear();
       routeStops.clear();
+      _stopListenersAdded.clear();
 
-      // Stop 1 ke liye link add karo
       _stopLayerLinks.add(LayerLink());
       routeStops.add(
         RouteStop(
@@ -163,7 +171,6 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
         ),
       );
 
-      // Stop 2 ke liye link add karo
       _stopLayerLinks.add(LayerLink());
       routeStops.add(
         RouteStop(
@@ -191,9 +198,9 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
     if (stopsCountStr.isNotEmpty) {
       final stopsCount = int.tryParse(stopsCountStr) ?? 0;
 
-      // Pehle existing links clear karo
       _stopLayerLinks.clear();
       routeStops.clear();
+      _stopListenersAdded.clear();
 
       for (int i = 1; i <= stopsCount; i++) {
         final stopTypeStr = cache["stop_${i}_type"]?.toString() ?? "";
@@ -207,7 +214,6 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
           stopType = i == 1 ? StopType.pickup : StopType.dropOff;
         }
 
-        // Har stop ke liye naya link add karo
         _stopLayerLinks.add(LayerLink());
 
         final stop = RouteStop(
@@ -324,8 +330,12 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
     required TextEditingController postalController,
     required String cachePrefix,
     required LayerLink layerLink,
+    required String fieldId,
   }) {
-    // Remove old listener if any
+    if (_addressListenersAdded.containsKey(fieldId) && _addressListenersAdded[fieldId]!) {
+      return;
+    }
+
     addressController.removeListener(
       () => _onAddressChanged(
         addressController,
@@ -337,7 +347,6 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
       ),
     );
 
-    // Add new listener with all parameters
     addressController.addListener(
       () => _onAddressChanged(
         addressController,
@@ -348,6 +357,8 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
         layerLink,
       ),
     );
+
+    _addressListenersAdded[fieldId] = true;
   }
 
   void _onAddressChanged(
@@ -360,8 +371,13 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
   ) {
     final input = addressController.text.trim();
 
+    // **FIX: Don't show suggestions during initial load**
+    if (!_isInitialLoadComplete) {
+      return;
+    }
+
     if (_isSelectingSuggestion) {
-      return; // Agar suggestion select kar rahe hain to kuch mat karo
+      return;
     }
 
     if (_debounce?.isActive ?? false) {
@@ -374,6 +390,13 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
         return;
       }
 
+      // **FIX: Don't show suggestions if already have complete address**
+      if (cityController.text.isNotEmpty && 
+          stateController.text.isNotEmpty && 
+          postalController.text.isNotEmpty) {
+        return;
+      }
+
       try {
         final result = await places.findAutocompletePredictions(
           input,
@@ -383,7 +406,6 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
         _predictions = result.predictions;
 
         if (_predictions.isNotEmpty && mounted) {
-          // Store current field info for selection
           _currentAddressController = addressController;
           _currentCityController = cityController;
           _currentStateController = stateController;
@@ -514,21 +536,18 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
       String city = "", state = "", postal = "";
 
       for (final c in components) {
-        print("Component: ${c.name}, Types: ${c.types}");
         if (c.types.contains("locality")) city = c.name;
         if (c.types.contains("administrative_area_level_1")) state = c.name;
         if (c.types.contains("postal_code")) postal = c.name;
       }
 
       if (mounted && _currentAddressController != null) {
-        // Update fields
         _currentAddressController!.text =
             detail.place?.address ?? prediction.fullText;
         _currentCityController?.text = city;
         _currentStateController?.text = state;
         _currentPostalController?.text = postal;
 
-        // Save coordinates
         final latLng = detail.place?.latLng;
         if (latLng != null && _currentCachePrefix != null) {
           ref
@@ -548,7 +567,6 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
         _checkFormFilled();
       }
 
-      // Reset flag after a delay
       Future.delayed(const Duration(milliseconds: 300), () {
         _isSelectingSuggestion = false;
       });
@@ -568,7 +586,6 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
     _overlayEntry = null;
   }
 
-  // Get coordinates from address (for background listeners)
   Future<LatLng?> _getCoordinatesFromAddress(String address) async {
     try {
       final predictions = await places.findAutocompletePredictions(
@@ -591,11 +608,12 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
     }
   }
 
-  // Pickup listener for coordinates (background)
   void setupPickupListener() {
+    if (_pickupListenerAdded) return;
+    
     address1Controller.addListener(() async {
       final input = address1Controller.text.trim();
-      if (input.length < 3 || _isSelectingSuggestion) return;
+      if (input.length < 3 || _isSelectingSuggestion || !_isInitialLoadComplete) return;
 
       _debounce?.cancel();
       _debounce = Timer(const Duration(milliseconds: 800), () async {
@@ -608,20 +626,22 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
             ref
                 .read(orderCacheProvider.notifier)
                 .saveValue("pickup_longitude", latLng.lng.toString());
-            print("✅ Pickup Coordinates: ${latLng.lat}, ${latLng.lng}");
           }
         } catch (e) {
           print("❌ Error getting pickup coordinates: $e");
         }
       });
     });
+    
+    _pickupListenerAdded = true;
   }
 
-  // Delivery listener for coordinates (background)
   void setupDeliveryListener() {
+    if (_deliveryListenerAdded) return;
+    
     address1DeliveryController.addListener(() async {
       final input = address1DeliveryController.text.trim();
-      if (input.length < 3 || _isSelectingSuggestion) return;
+      if (input.length < 3 || _isSelectingSuggestion || !_isInitialLoadComplete) return;
 
       _debounce?.cancel();
       _debounce = Timer(const Duration(milliseconds: 800), () async {
@@ -634,18 +654,18 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
             ref
                 .read(orderCacheProvider.notifier)
                 .saveValue("delivery_longitude", latLng.lng.toString());
-            print("✅ Delivery Coordinates: ${latLng.lat}, ${latLng.lng}");
           }
         } catch (e) {
           print("❌ Error getting delivery coordinates: $e");
         }
       });
     });
+    
+    _deliveryListenerAdded = true;
   }
 
-  // Set stop coordinates (background)
   void _setStopCoordinates(String address, int stopIndex) async {
-    if (address.length < 3 || _isSelectingSuggestion) return;
+    if (address.length < 3 || _isSelectingSuggestion || !_isInitialLoadComplete) return;
 
     try {
       final latLng = await _getCoordinatesFromAddress(address);
@@ -656,7 +676,6 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
         ref
             .read(orderCacheProvider.notifier)
             .saveValue("stop_${stopIndex}_longitude", latLng.lng.toString());
-        print("✅ Stop $stopIndex Coordinates: ${latLng.lat}, ${latLng.lng}");
       }
     } catch (e) {
       print("❌ Error getting stop coordinates: $e");
@@ -707,6 +726,10 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
     for (int i = 0; i < routeStops.length; i++) {
       final stop = routeStops[i];
       final stopIndex = i + 1;
+      
+      if (_stopListenersAdded.containsKey(stopIndex) && _stopListenersAdded[stopIndex]!) {
+        continue;
+      }
 
       ref
           .read(orderCacheProvider.notifier)
@@ -725,6 +748,8 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
       stop.postalCode.addListener(() => _saveStopAndCheck(stop, stopIndex));
       stop.contactEmail.addListener(() => _saveStopAndCheck(stop, stopIndex));
       stop.notes.addListener(() => _saveStopAndCheck(stop, stopIndex));
+      
+      _stopListenersAdded[stopIndex] = true;
     }
   }
 
@@ -967,6 +992,10 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
   }
 
   void _addStopListeners(RouteStop stop, int index) {
+    if (_stopListenersAdded.containsKey(index) && _stopListenersAdded[index]!) {
+      return;
+    }
+
     stop.contactName.addListener(() => _saveStopAndCheck(stop, index));
     stop.contactPhone.addListener(() => _saveStopAndCheck(stop, index));
     stop.address.addListener(() {
@@ -980,6 +1009,8 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
     stop.notes.addListener(() => _saveStopAndCheck(stop, index));
     stop.quantity.addListener(() => _saveStopAndCheck(stop, index));
     stop.weight.addListener(() => _saveStopAndCheck(stop, index));
+    
+    _stopListenersAdded[index] = true;
   }
 
   void _removeRouteStop(int index) {
@@ -999,10 +1030,18 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
 
         routeStops.removeAt(index);
         _stopLayerLinks.removeAt(index);
-
+        
+        _stopListenersAdded.remove(index + 1);
+        
+        final Map<int, bool> updatedFlags = {};
         for (int i = 0; i < routeStops.length; i++) {
           routeStops[i].id = i + 1;
+          if (_stopListenersAdded.containsKey(i + 2)) {
+            updatedFlags[i + 1] = _stopListenersAdded[i + 2]!;
+          }
         }
+        _stopListenersAdded.clear();
+        _stopListenersAdded.addAll(updatedFlags);
       });
 
       ref
@@ -1022,7 +1061,6 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
       if (value && routeStops.isEmpty) {
         _initializeMultiStop();
       } else if (!value) {
-        // Single mode mein jaate waqt stops clear karo
         for (final stop in routeStops) {
           stop.contactName.dispose();
           stop.contactPhone.dispose();
@@ -1037,6 +1075,7 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
         }
         routeStops.clear();
         _stopLayerLinks.clear();
+        _stopListenersAdded.clear();
       }
     });
 
@@ -1048,7 +1087,6 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
     _debounce?.cancel();
     _removeOverlay();
 
-    // Dispose all controllers
     lengthController.dispose();
     widthController.dispose();
     heightController.dispose();
@@ -1092,9 +1130,7 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
 
   @override
   Widget build(BuildContext context) {
-    // Setup address search for pickup and delivery (Standard mode)
     if (!isMultiStopEnabled) {
-      // Pickup field setup
       setupAddressSearch(
         addressController: address1Controller,
         cityController: cityController,
@@ -1102,9 +1138,9 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
         postalController: postalController,
         cachePrefix: "pickup",
         layerLink: _pickupLayerLink,
+        fieldId: "pickup_address",
       );
 
-      // Delivery field setup
       setupAddressSearch(
         addressController: address1DeliveryController,
         cityController: cityDeliveryController,
@@ -1112,6 +1148,7 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
         postalController: postalDeliveryController,
         cachePrefix: "delivery",
         layerLink: _deliveryLayerLink,
+        fieldId: "delivery_address",
       );
     }
 
@@ -1227,7 +1264,6 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
   }
 
   Widget _buildMultiStopUI() {
-    // Setup address search for each stop
     for (int i = 0; i < routeStops.length; i++) {
       final stop = routeStops[i];
       setupAddressSearch(
@@ -1237,6 +1273,7 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
         postalController: stop.postalCode,
         cachePrefix: "stop_${stop.id}",
         layerLink: _stopLayerLinks[i],
+        fieldId: "stop_${stop.id}_address",
       );
     }
 
@@ -1360,7 +1397,6 @@ class _Step2ScreenState extends ConsumerState<Step2Screen> {
             ),
           ],
           const SizedBox(height: 16),
-          // Address field with its specific link
           CompositedTransformTarget(
             link: index < _stopLayerLinks.length
                 ? _stopLayerLinks[index]

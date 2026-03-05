@@ -10,6 +10,7 @@ import 'dart:convert';
 import '../../../../constants/bottom_show.dart';
 import '../../../../export.dart';
 import '../../order_successful.dart';
+import '../../wallet_flow/balance/balance_controller.dart';
 
 class PaymentOptionsModal extends ConsumerStatefulWidget {
   final AlOrder order;
@@ -32,6 +33,7 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
   bool _isProcessing = false;
   String? _selectedMethod;
   String? _errorMessage;
+  double walletBalance = 0;
 
   Future<void> _processWalletPayment() async {
     setState(() {
@@ -69,7 +71,7 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
             MaterialPageRoute(
               builder: (_) => OrderSuccessful(
                 orderNumber: widget.order.orderNumber,
-                status: "paid",
+                status: widget.order.status,
                 totalAmount: double.tryParse(widget.order.finalCost) ?? 0.0,
                 createedAt: widget.order.createdAt,
                 distanceKm: double.tryParse(widget.order.distanceKm) ?? 0.0,
@@ -191,6 +193,17 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
 
   @override
   Widget build(BuildContext context) {
+    final walletState = ref.watch(walletBalanceControllerProvider);
+
+    double walletBalance = walletState.when(
+      data: (data) => data?.data.balance ?? 0,
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
+
+    double orderAmount = double.tryParse(widget.order.finalCost) ?? 0;
+
+    bool isWalletEnough = walletBalance >= orderAmount;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -255,11 +268,18 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
           // Wallet Option
           _buildPaymentOption(
             title: "Pay with Wallet",
-            subtitle: "Instant payment from your wallet balance",
+            subtitle: isWalletEnough
+                ? "Balance: R $walletBalance"
+                : "Insufficient wallet balance (R $walletBalance)",
             icon: Icons.account_balance_wallet,
             iconColor: Colors.green,
             isSelected: _selectedMethod == 'wallet',
-            onTap: () => setState(() => _selectedMethod = 'wallet'),
+            isDisabled: !isWalletEnough,
+            onTap: () {
+              if (isWalletEnough) {
+                setState(() => _selectedMethod = 'wallet');
+              }
+            },
           ),
 
           const SizedBox(height: 12),
@@ -394,13 +414,16 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
     required Color iconColor,
     required bool isSelected,
     required VoidCallback onTap,
+    bool isDisabled = false,
   }) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isDisabled ? null : onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected
+          color: isDisabled
+              ? Colors.grey.shade200
+              : isSelected
               ? AppColors.electricTeal.withOpacity(0.1)
               : AppColors.lightGrayBackground,
           borderRadius: BorderRadius.circular(12),
@@ -433,13 +456,16 @@ class _PaymentOptionsModalState extends ConsumerState<PaymentOptionsModal> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.darkText,
+                      color: isDisabled ? Colors.grey : AppColors.darkText,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 13, color: AppColors.mediumGray),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: isDisabled ? Colors.grey : AppColors.mediumGray,
+                    ),
                   ),
                 ],
               ),

@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:logisticscustomer/constants/bottom_show.dart';
 import 'package:logisticscustomer/features/home/Get_Profile/get_profile_screen.dart';
 import '../../../export.dart';
-import '../../bottom_navbar/bottom_navbar_screen.dart';
 import 'edit_profile_controller.dart';
 import 'edit_profile_modal.dart';
 
@@ -127,7 +126,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               MaterialPageRoute(builder: (context) => const GetProfileScreen()),
             );
           },
-          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+          icon: const Icon(Icons.arrow_back, size: 18),
         ),
         backgroundColor: AppColors.electricTeal,
         foregroundColor: AppColors.pureWhite,
@@ -142,6 +141,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Profile Picture
                 GestureDetector(
@@ -275,9 +276,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      const TripsBottomNavBarScreen(
-                                        initialIndex: 3,
-                                      ),
+                                      const GetProfileScreen()
                                 ),
                               );
                             }
